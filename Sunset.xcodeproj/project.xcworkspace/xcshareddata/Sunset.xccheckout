@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>5E7AD654-5DFB-4454-918E-D25E08D912BA</string>
+	<key>IDESourceControlProjectName</key>
+	<string>Sunset</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>DD510A67-9494-400A-9AE6-81B1FE06F813</key>
+		<string>https://github.com/dragonbabyi/sunset.git</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>Sunset.xcodeproj/project.xcworkspace</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>DD510A67-9494-400A-9AE6-81B1FE06F813</key>
+		<string>../..</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>https://github.com/dragonbabyi/sunset.git</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>110</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>DD510A67-9494-400A-9AE6-81B1FE06F813</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>DD510A67-9494-400A-9AE6-81B1FE06F813</string>
+			<key>IDESourceControlWCCName</key>
+			<string>sunset</string>
+		</dict>
+	</array>
+</dict>
+</plist>

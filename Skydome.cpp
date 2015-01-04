@@ -19,6 +19,7 @@
 
 //data file
 #include "ArHosekSkyModelData_CIEXYZ.h"
+#include "ArHosekSkyModelData_RGB.h"
 
 // using core modern OpenGL
 #include <GL/glew.h>
@@ -30,23 +31,57 @@ void ArHosekSkyModel_CookRadianceConfiguration(double* dataset, float &HosekRadi
 
 Skydome::Skydome() {
 //    Initialize program
-//    data = NULL;
+ 
     skydomeShader[0] = NULL;
+    skydomeShader[1] = NULL;
+    
+    skyframebuffer = 0;
+    glGenFramebuffers(1, &skyframebuffer);
+    
+    //add sky texture
+    skyTexSize = 256;
+    glGenTextures(1, &skytexture);
+    glActiveTexture(skytexture);
+	glBindTexture(GL_TEXTURE_2D, skytexture);
+    
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, skyTexSize, skyTexSize, 0, GL_RGBA, GL_FLOAT, 0);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glGenerateMipmapEXT(GL_TEXTURE_2D);
+    
+    //depth
+    glGenRenderbuffers(1, &depthrenderbuffer);
+    glBindRenderbuffer(GL_RENDERBUFFER, depthrenderbuffer);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, 1024, 768);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthrenderbuffer);
     
     glGenBuffers(NUM_BUFFERS, bufferIDs);
-    glGenVertexArrays(NUM_VARRAYS, varrayIDs);    
- 
+    glGenVertexArrays(NUM_VARRAYS, varrayIDs);
+    
+    //draw to texture
+    vec4f *vertexdata = new vec4f[4];
+    vertexdata[0] = vec4f(-1.0, -1.0, 0.0, 0.0);
+    vertexdata[1] = vec4f(+1.0, -1.0, 1.0, 0.0);
+    vertexdata[2] = vec4f(-1.0, +1.0, 0.0, 1.0);
+    vertexdata[3] = vec4f(+1.0, +1.0, 1.0, 1.0);
+    glBindBuffer(GL_ARRAY_BUFFER, bufferIDs[QUAD_VERTEX_BUFFER]);
+    glBufferData(GL_ARRAY_BUFFER, 4 * sizeof(vec4f), vertexdata, GL_STATIC_DRAW);
+    
+    GLuint indicesdata[6] = {0, 1, 2, 2, 1, 3};
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferIDs[QUAD_INDEX_BUFFER]);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(GLuint), indicesdata, GL_STATIC_DRAW);
+    
     //default
     solarElevation = M_PI/2.0;
-    turbidity = 6.7;
+    turbidity = 2.0;
     albedo = 0.03;
     HosekSkyModel_Configuration();
     
-    //////////////////////  draw  hemishpere  //////////////////////////
+    //////////////////////  create meshes (hemishpere)  //////////////////////////
     
     std::vector<GLfloat> vert;
     std::vector<GLint> indices;
-    // create meshes
+    
     float radius = 1.0;    // have to be the same for the sun shader part
     int iFactor = 180;
     int h = 90;
@@ -89,49 +124,43 @@ Skydome::Skydome() {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferIDs[INDEX_BUFFER]);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, iFactor*h*6*sizeof(int), &indices.front(), GL_STATIC_DRAW);
     
-    generateTexture();
-    
+    loadProgram();
     updateShader();
 }
 
 
 Skydome::~Skydome() {
-    
 //    glDeleteProgram(skydomeShader);
     glDeleteBuffers(NUM_BUFFERS, bufferIDs);
-//    glDeleteTextures(1, &DatasetTexture);
+    glDeleteTextures(1, &skytexture);
 }
 
 void Skydome::loadProgram() {
     char* files[1];
-    files[0] = "Shader/skydome.glsl";
+    files[0] = "Shader/skydome1.glsl";
 //    if (skydomeShader[0] != NULL) {
 //        delete skydomeShader[0];
 //        skydomeShader[0] = NULL;
 //    }
     skydomeShader[0] = new Program(1, files);
+    
+    // second shader
+    files[0] = "Shader/tonemapping.glsl";
+    
+    skydomeShader[1] = new Program(1, files);
 
 }
 
-//Todo:  render to texture
-void Skydome::generateTexture() {
- 
- 
-}
 
 void Skydome::updateShader()
 {
-    loadProgram();
-
     glUseProgram(skydomeShader[0]->program);
+    glBindVertexArray(varrayIDs[QUAD_VERTEX]);
+    posQuadAttrib = glGetAttribLocation(skydomeShader[0]->program, "position");
+    glEnableVertexAttribArray(posQuadAttrib);
+    glBindBuffer(GL_ARRAY_BUFFER, bufferIDs[QUAD_VERTEX_BUFFER]);
+    glVertexAttribPointer(posQuadAttrib, 4, GL_FLOAT, GL_FALSE, 0, 0);   // 4!!
     
-    // enable vertex arrays
-    glBindVertexArray(varrayIDs[VARRAY]);
-    positionAttrib = glGetAttribLocation(skydomeShader[0]->program, "vPosition");
-    glEnableVertexAttribArray(positionAttrib);
-    glBindBuffer(GL_ARRAY_BUFFER, bufferIDs[POSITION_BUFFER]);
-    glVertexAttribPointer(positionAttrib, 3, GL_FLOAT, GL_FALSE, 0, 0);
- 
     glUniformBlockBinding(skydomeShader[0]->program,
                           glGetUniformBlockIndex(skydomeShader[0]->program,"Matrices"),
                           AppContext::MATRIX_UNIFORMS);
@@ -147,53 +176,148 @@ void Skydome::updateShader()
     glUniform3f(glGetUniformLocation(skydomeShader[0]->program, "ZHosekDEF"), HosekConfig[2][3], HosekConfig[2][4], HosekConfig[2][5]);
     glUniform3f(glGetUniformLocation(skydomeShader[0]->program, "ZHosekGHI"), HosekConfig[2][6], HosekConfig[2][7], HosekConfig[2][8]);
     
+/*
+    glUseProgram(skydomeShader[1]->program);
+///////
+    glBindVertexArray(varrayIDs[QUAD_VERTEX]);
+    positionAttrib = glGetAttribLocation(skydomeShader[1]->program, "position");
+    glEnableVertexAttribArray(positionAttrib);
+    glBindBuffer(GL_ARRAY_BUFFER, bufferIDs[QUAD_VERTEX_BUFFER]);
+    glVertexAttribPointer(positionAttrib, 4, GL_FLOAT, GL_FALSE, 0, 0);   // 4!!
+    
+    glUniformBlockBinding(skydomeShader[1]->program,
+                          glGetUniformBlockIndex(skydomeShader[1]->program,"Matrices"),
+                          AppContext::MATRIX_UNIFORMS);
+    
+    
+    // enable vertex arrays
+//    glBindVertexArray(varrayIDs[VARRAY]);
+//    positionAttrib = glGetAttribLocation(skydomeShader[1]->program, "vPosition");
+//    glEnableVertexAttribArray(positionAttrib);
+//    glBindBuffer(GL_ARRAY_BUFFER, bufferIDs[POSITION_BUFFER]);
+//    glVertexAttribPointer(positionAttrib, 3, GL_FLOAT, GL_FALSE, 0, 0);
+//    
+//    glUniformBlockBinding(skydomeShader[1]->program,
+//                          glGetUniformBlockIndex(skydomeShader[0]->program,"Matrices"),
+//                          AppContext::MATRIX_UNIFORMS);
+    
+    //skytexture
+    glUniform1i(glGetUniformLocation(skydomeShader[1]->program, "skySample2D"), skytexture);
+*/
     // turn off everything we enabled
-//    glBindTexture(GL_TEXTURE_1D, 0);  //0
+    glBindTexture(GL_TEXTURE_2D, 0);  //0
     glBindVertexArray(0);
     glUseProgram(0);
 
 }
 
 void Skydome::draw( GLFWwindow *win, float theta) {
+    
+    updateShader();
+    
     //recompute the configuration if the sunTheta changes
     if( abs(theta + solarElevation - M_PI/2.0) < 1e-8) {
         solarElevation = M_PI/2.0 - theta;
         HosekSkyModel_Configuration();
     }
     
-    //
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glDrawBuffer(GL_BACK);
-    
-    // get window dimensions
-    int width, height;
-    glfwGetFramebufferSize(win, &width, &height);
-    glViewport(0, 0, width, height);
-	   
+    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+    // render to skytexture
     glEnable(GL_DEPTH_TEST);
-//	glEnable(GL_CULL_FACE);
-//	glCullFace(GL_BACK);
+    glBindTexture(GL_TEXTURE_2D, skytexture);
+    
+    glBindFramebuffer(GL_FRAMEBUFFER, skyframebuffer);
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, skytexture, 0);
+    
+    GLenum DrawBuffers[1] = {GL_COLOR_ATTACHMENT0};
+    glDrawBuffers(1, DrawBuffers);
+    
+    //check
+    if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+    {
+        printf("%d\n", glCheckFramebufferStatus(GL_FRAMEBUFFER));
+    }
+    
+    glViewport(0, 0, skyTexSize, skyTexSize);
     
     glUseProgram(skydomeShader[0]->program);
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
     
-//    ///DatasetTexture
-//    glActiveTexture(GL_TEXTURE0 + DatasetTexture);
-//    glBindTexture(GL_TEXTURE_1D, DatasetTexture);
+    glBindVertexArray(varrayIDs[QUAD_VERTEX]);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferIDs[QUAD_INDEX_BUFFER]);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
     
-    /////////// debug ///////////////////
-//    GLfloat Pixels[64*3];
-//    glGetTexImage(GL_TEXTURE_1D, 0, GL_RGB, GL_FLOAT, &Pixels);
+//    glBindTexture(GL_TEXTURE_2D, 0);
+//    glUseProgram(0);
     
-    glBindVertexArray(varrayIDs[VARRAY]);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferIDs[INDEX_BUFFER]);
-//    glDrawElements(GL_TRIANGLES, iFactor*h*6, GL_UNSIGNED_INT, 0);
-    glDrawElements(GL_TRIANGLES, 97200, GL_UNSIGNED_INT, 0);
+    //debug
+    glGetError();
+    float pixeldata[16] = {0};
+    glReadPixels( 500, 500, 2, 2, GL_RGBA, GL_FLOAT, pixeldata);
     
+    ///////////////////////////////////////////////////////////
+    // final render
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glDrawBuffer(GL_BACK);
+    
+//    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+//    glEnable(GL_DEPTH_TEST);
+//    glEnable(GL_CULL_FACE);
+//    glCullFace(GL_BACK);
+    
+// test tone mapping    /////debugging
+    glViewport(0, 0, skyTexSize, skyTexSize);
+    
+    glUseProgram(skydomeShader[1]->program);
+    
+    glBindVertexArray(varrayIDs[QUAD_VERTEX]);
+    positionAttrib = glGetAttribLocation(skydomeShader[1]->program, "position");
+    glEnableVertexAttribArray(positionAttrib);
+    glBindBuffer(GL_ARRAY_BUFFER, bufferIDs[QUAD_VERTEX_BUFFER]);
+    glVertexAttribPointer(positionAttrib, 4, GL_FLOAT, GL_FALSE, 0, 0);   // 4!!
+    
+    glUniformBlockBinding(skydomeShader[1]->program,
+                          glGetUniformBlockIndex(skydomeShader[1]->program,"Matrices"),
+                          AppContext::MATRIX_UNIFORMS);
+
+    //skytexture
+    glActiveTexture(GL_TEXTURE0 + skytexture);
+    glGenerateMipmap(GL_TEXTURE_2D);
+    
+    glBindTexture(GL_TEXTURE_2D, skytexture);
+    glUniform1i(glGetUniformLocation(skydomeShader[1]->program, "skySample2D"), skytexture);
+    
+    glBindVertexArray(varrayIDs[QUAD_VERTEX]);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferIDs[QUAD_INDEX_BUFFER]);
+    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+    
+    
+//    // get window dimensions
+//    int width, height;
+//    glfwGetFramebufferSize(win, &width, &height);
+//    glViewport(0, 0, width, height);
+//
+//    glUseProgram(skydomeShader[1]->program);
+//    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+//  
+//    glActiveTexture(skytexture);
+//    glGenerateMipmap(GL_TEXTURE_2D);
+//
+//    glUniformBlockBinding(skydomeShader[1]->program,
+//                          glGetUniformBlockIndex(skydomeShader[1]->program,"Matrices"),
+//                          AppContext::MATRIX_UNIFORMS);
+//    
+//    //skytexture
+//    glUniform1i(glGetUniformLocation(skydomeShader[1]->program, "skySample2D"), skytexture);
+//
+//    
+//    glBindVertexArray(varrayIDs[VARRAY]);
+//    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferIDs[INDEX_BUFFER]);
+//    glDrawElements(GL_TRIANGLES, 97200, GL_UNSIGNED_INT, 0);
+
 //    glDisable(GL_CULL_FACE);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-    glBindTexture(GL_TEXTURE_1D, 0);
+    glBindTexture(GL_TEXTURE_2D, 0);
     glBindVertexArray(0);
     glUseProgram(0);
 

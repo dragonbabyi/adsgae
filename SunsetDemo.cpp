@@ -102,7 +102,8 @@ GLFWwindow *initGLFW(AppContext *appctx)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
-    GLFWwindow *win = glfwCreateWindow(820, 600, "OpenGL Demo", 0, 0);
+//    GLFWwindow *win = glfwCreateWindow(820, 600, "OpenGL Demo", 0, 0);
+    GLFWwindow *win = glfwCreateWindow(256, 256, "OpenGL Demo", 0, 0);
     if (! win) {
         glfwTerminate();
         return 0;
@@ -141,8 +142,9 @@ int main(int argc, char *argv[])
     // initialize context (after GLFW)
     appctx.scene = new Scene(win);
     appctx.input = new Input;
-    appctx.ocean = new Ocean(win);
+   
     appctx.sky = new Skydome();
+//    appctx.ocean = new Ocean(win);
     
     //all program should be initialized
     while (!glfwWindowShouldClose(win)) {
@@ -172,10 +174,10 @@ int main(int argc, char *argv[])
         //        vboParams.w = camera.theta;
         //    }
         
-        appctx.ocean->draw(win);
+       
         appctx.sky->draw(win, appctx.scene->sunTheta);
-        
-        // show what we drew
+//        appctx.ocean->draw(win);
+ 
         glfwSwapBuffers(win);
  
         glfwPollEvents();

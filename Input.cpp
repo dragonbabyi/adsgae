@@ -60,7 +60,7 @@ void Input::mouseMove(GLFWwindow *win, Scene *scene, double x, double y)
             scene->sunTheta += dy / 400.0;
         }
         
-        printf("%f\n", scene->sunTheta);
+//        printf("%f\n", scene->sunTheta);
     }
     
     // update prior mouse state
@@ -184,12 +184,12 @@ void Input::keyUpdate(Scene *scene)
         // update pan based on time elapsed since last update
         // ensures uniform rate of change
         
-        scene->camera.x += scene->camera.vel * delta * scene->camera.velx * fmax(scene->camera.z*0.5f,1.0f);
-        scene->camera.y += scene->camera.vel * delta * scene->camera.vely * fmax(scene->camera.z*0.5f,1.0f);
-        scene->camera.z += scene->camera.vel * delta * scene->camera.velz * fmax(scene->camera.z*0.5f,1.0f);
+        scene->camera.x += scene->camera.vel * delta * scene->camera.velx * fmax(scene->camera.z,1.0f);
+        scene->camera.y += scene->camera.vel * delta * scene->camera.vely * fmax(scene->camera.z,1.0f);
+        scene->camera.z += scene->camera.vel * delta * scene->camera.velz * fmax(scene->camera.z,1.0f);
         
-        scene->camera.theta += scene->camera.vel * delta * scene->camera.velt * 5.0;
-        scene->camera.phi += scene->camera.vel * delta * scene->camera.velp * 5.0;
+        scene->camera.theta += scene->camera.vel * delta * scene->camera.velt * 2.0;
+        scene->camera.phi += scene->camera.vel * delta * scene->camera.velp * 2.0;
         
         //        printf("%f\n", scene->camera.theta);
         if(scene->camera.theta  < -27.f)

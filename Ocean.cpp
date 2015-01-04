@@ -22,9 +22,9 @@ float gridSize = 4.0f;
 float hdrExposure = 1.05;
 bool grid = false; //false
 bool animate = true;
-bool seaContrib = true;
+bool seaContrib = false;
 bool sunContrib = true;
-bool skyContrib = true; //true
+bool skyContrib = false;
 bool foamContrib = false;
 bool manualFilter = false;
 bool show_spectrum = false;
@@ -290,11 +290,15 @@ void Ocean::draw( GLFWwindow *win)
 
     //update shader
 	glUseProgram(programs[PROGRAM_RENDER]->program);
+    glUniform1i(glGetUniformLocation(programs[PROGRAM_RENDER]->program, "slopeVarianceSampler"), TEXTURE_SLOPE_VARIANCE);
 	glUniform1i(glGetUniformLocation(programs[PROGRAM_RENDER]->program, "fftWavesSampler"), TEXTURE_FFT_PING);
     
     glUniformBlockBinding(programs[PROGRAM_RENDER]->program,
                           glGetUniformBlockIndex(programs[PROGRAM_RENDER]->program,"Matrices"),
                           AppContext::MATRIX_UNIFORMS);
+    
+    glUniformBlockBinding(programs[PROGRAM_RENDER]->program,
+                          glGetUniformLocation(programs[PROGRAM_RENDER]->program, "skySampler"), AppContext::TEXTURE_SKY);
     
     // bind vertices position in shader
     glBindVertexArray(varrays[VARRAY_MESH]);
@@ -463,8 +467,10 @@ void Ocean::loadPrograms()
 	}
     programs[PROGRAM_RENDER] = new Program(1, files, options);
 	glUseProgram(programs[PROGRAM_RENDER]->program);
-	glUniform1i(glGetUniformLocation(programs[PROGRAM_RENDER]->program, "skySampler"), TEXTURE_SKY);
-	glUniform1i(glGetUniformLocation(programs[PROGRAM_RENDER]->program, "slopeVarianceSampler"), TEXTURE_SLOPE_VARIANCE);
+    
+	//glUniform1i(glGetUniformLocation(programs[PROGRAM_RENDER]->program, "skySampler"), TEXTURE_SKY);
+	
+    //glUniform1i(glGetUniformLocation(programs[PROGRAM_RENDER]->program, "slopeVarianceSampler"), TEXTURE_SLOPE_VARIANCE);
 	glUniform1i(glGetUniformLocation(programs[PROGRAM_RENDER]->program, "foamDistribution"), TEXTURE_GAUSSZ);
     glUniform1f(glGetUniformLocation(programs[PROGRAM_RENDER]->program, "hdrExposure"), hdrExposure);
 	glUniform1f(glGetUniformLocation(programs[PROGRAM_RENDER]->program, "jacobian_scale"), jacobian_scale);

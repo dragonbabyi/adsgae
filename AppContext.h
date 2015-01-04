@@ -16,7 +16,7 @@ struct AppContext {
     class Skydome *sky;
     
     // uniform matrix block indices
-    enum { MATRIX_UNIFORMS };
+    enum { MATRIX_UNIFORMS, TEXTURE_SKY };
     
     AppContext() : scene(0), input(0), ocean(0), sky(0) {}
     

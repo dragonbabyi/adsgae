@@ -16,13 +16,7 @@
 // using core modern OpenGL
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
-
-
-//unsigned int skyTexSize = 256;
-// struct vec3 {
-//     float x,y,z;
-//     vec3(float X=0, float Y=0, float Z=0):x(X),y(Y),z(Z) {};
-// };
+ 
 
 class Skydome {
 private:
@@ -30,34 +24,37 @@ private:
     
     float solarElevation;
     float turbidity;
-    float albedo;   //albedo ->= 0, because open ocean albedo is near 0.
+    float albedo;   // open ocean albedo is near 0.03
     
     float HosekRadiances[3];
     float HosekConfig[3][9];
     
     // GL vertex array object IDs
-    enum {VARRAY, NUM_VARRAYS};
+    enum {VARRAY, QUAD_VERTEX, NUM_VARRAYS};
     unsigned int varrayIDs[NUM_VARRAYS];
     
     // GL buffer object IDs
-    enum {POSITION_BUFFER, INDEX_BUFFER, NUM_BUFFERS};  //ADD NORMAL
+    enum {POSITION_BUFFER, INDEX_BUFFER, QUAD_VERTEX_BUFFER, QUAD_INDEX_BUFFER, NUM_BUFFERS};  //ADD NORMAL
     unsigned int bufferIDs[NUM_BUFFERS];
     
+    GLuint depthrenderbuffer;
+    GLuint skyframebuffer;
+    
     // vertex attribute IDs
-    unsigned int positionAttrib;
-//    unsigned int normalAttrib;
+    unsigned int positionAttrib, posQuadAttrib;
     
-//    GLfloat *data;
-//    GLuint DatasetTexture;
-    
-    Program* skydomeShader[1];
+    Program* skydomeShader[2];   //1 scattering 2 tone mapping
     
 public:
+    GLuint skytexture;
+    unsigned int skyTexSize;
+    
+  public:
     Skydome();
     ~Skydome();
     
     void loadProgram();
-    void generateTexture();
+    
     void updateShader();
     void HosekSkyModel_Configuration();
     void draw( GLFWwindow *win, float sunTheta);

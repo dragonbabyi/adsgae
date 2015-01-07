@@ -20,7 +20,7 @@
 
 enum {
     // textures
-    TEXTURE_SKY,
+    
     TEXTURE_SPECTRUM12,
     TEXTURE_SPECTRUM34,
     TEXTURE_SLOPE_VARIANCE,
@@ -28,6 +28,7 @@ enum {
     TEXTURE_FFT_PONG,
     TEXTURE_BUTTERFLY,
     TEXTURE_GAUSSZ,
+    TEXTURE_SKY,
     TEXTURE_COUNT,
     
     // GL vertex array object IDs

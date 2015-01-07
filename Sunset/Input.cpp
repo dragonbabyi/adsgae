@@ -60,7 +60,7 @@ void Input::mouseMove(GLFWwindow *win, Scene *scene, double x, double y)
             scene->sunTheta += dy / 400.0;
         }
         
-        printf("%f\n", scene->sunTheta);
+//        printf("%f\n", scene->sunTheta);
     }
     
     // update prior mouse state

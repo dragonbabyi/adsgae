@@ -48,6 +48,7 @@ private:
 public:
     GLuint skytexture;
     unsigned int skyTexSize;
+    bool init;
     
   public:
     Skydome();
@@ -56,7 +57,7 @@ public:
     void loadProgram();
     
     void updateShader();
-    void HosekSkyModel_Configuration();
+    void HosekSkyModel_Configuration(float solarAngle);
     void draw( GLFWwindow *win, float sunTheta);
     
 };

@@ -74,7 +74,8 @@ Skydome::Skydome() {
     solarElevation = M_PI/2.0;
     turbidity = 8.0;
     albedo = 0.03;
-    HosekSkyModel_Configuration();
+    init = false;
+//    HosekSkyModel_Configuration();
     
     //////////////////////  create meshes (hemishpere)  //////////////////////////
     
@@ -124,7 +125,7 @@ Skydome::Skydome() {
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, iFactor*h*6*sizeof(int), &indices.front(), GL_STATIC_DRAW);
     
     loadProgram();
-    updateShader();
+//    updateShader();
 }
 
 
@@ -201,13 +202,18 @@ void Skydome::updateShader()
 
 void Skydome::draw( GLFWwindow *win, float theta) {
     
-    updateShader();
-    
-    //recompute the configuration if the sunTheta changes
-    if( abs(theta + solarElevation - M_PI/2.0) < 1e-8) {
+    // update HosekSkyModel_Configuration parameters
+    if ( !init ) {
         solarElevation = M_PI/2.0 - theta;
-        HosekSkyModel_Configuration();
+        HosekSkyModel_Configuration( solarElevation );
+        init = true;
     }
+    else if ( abs(theta + solarElevation - M_PI/2.0) < 1e-8) {   //recompute the configuration if the sunTheta changes
+        solarElevation = M_PI/2.0 - theta;
+        HosekSkyModel_Configuration( solarElevation );
+    }
+    
+    updateShader();
     
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
     // render to skytexture
@@ -309,11 +315,11 @@ void Skydome::draw( GLFWwindow *win, float theta) {
 }
 
 
-void Skydome::HosekSkyModel_Configuration() {
+void Skydome::HosekSkyModel_Configuration(float solarAngle) {
     for( unsigned int channel = 0; channel < 3; ++channel )
     {
-        ArHosekSkyModel_CookConfiguration(datasetsXYZ[channel], HosekConfig[channel], turbidity, albedo, solarElevation);
-        ArHosekSkyModel_CookRadianceConfiguration(datasetsXYZRad[channel], HosekRadiances[channel], turbidity, albedo, solarElevation );
+        ArHosekSkyModel_CookConfiguration(datasetsXYZ[channel], HosekConfig[channel], turbidity, albedo, solarAngle);
+        ArHosekSkyModel_CookRadianceConfiguration(datasetsXYZRad[channel], HosekRadiances[channel], turbidity, albedo, solarAngle );
     }
 }
 

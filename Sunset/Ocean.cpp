@@ -89,16 +89,6 @@ Ocean::Ocean(GLFWwindow *win)
     
     float maxAnisotropy = 1.0f;
     
-    glActiveTexture(GL_TEXTURE0 + TEXTURE_SKY);
-	glBindTexture(GL_TEXTURE_2D, textures[TEXTURE_SKY]);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, maxAnisotropy);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, skyTexSize, skyTexSize, 0, GL_RGBA, GL_FLOAT, NULL);
-//    glGenerateMipmapEXT(GL_TEXTURE_2D);
-    
 	glActiveTexture(GL_TEXTURE0 + TEXTURE_SPECTRUM12);
 	glBindTexture(GL_TEXTURE_2D, textures[TEXTURE_SPECTRUM12]);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -201,11 +191,6 @@ Ocean::Ocean(GLFWwindow *win)
     glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT6, textures[TEXTURE_GAUSSZ], 0, 6);
     glFramebufferTextureLayer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT7, textures[TEXTURE_GAUSSZ], 0, 7);
     
- 
-//	glBindFramebuffer(GL_FRAMEBUFFER, framebuffers[FRAMEBUFFER_SKY]);
-//    glDrawBuffer(GL_COLOR_ATTACHMENT0);
-//    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, textures[TEXTURE_SKY], 0);
-
 	// back to default framebuffer
 	glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glDrawBuffer(GL_BACK);
@@ -216,10 +201,6 @@ Ocean::Ocean(GLFWwindow *win)
 	// Programs
     loadPrograms();
     
-    // unbind!!!
-    //     glBindTexture(GL_TEXTURE_2D, 0);
-    //     glBindTexture(GL_TEXTURE_2D_ARRAY, 0);
-
 	// Slope
 	computeSlopeVarianceTex();  //textures[TEXTURE_SLOPE_VARIANCE]
 
@@ -246,7 +227,7 @@ void Ocean::updateShader()
     
 }
 
-void Ocean::draw( GLFWwindow *win)
+void Ocean::draw( GLFWwindow *win, unsigned int skytex)
 {
     static double now = glfwGetTime();
     static double update = glfwGetTime();
@@ -259,17 +240,10 @@ void Ocean::draw( GLFWwindow *win)
 		t += delta*speed;
     
     ///////////////////////////////////////////////////////
-//    glBindFramebuffer(GL_FRAMEBUFFER, framebuffers[FRAMEBUFFER_SKY]);
-//	glViewport(0, 0, skyTexSize, skyTexSize);
-    
-//    //draw (environment) sky map
-//    glActiveTexture(GL_TEXTURE0 + TEXTURE_SKY);
-//	glGenerateMipmap(GL_TEXTURE_2D);
-    
     // solve fft
     simulateFFTWaves(t);
-	glActiveTexture(GL_TEXTURE0 + TEXTURE_FFT_PING);
-    glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
+//	glActiveTexture(GL_TEXTURE0 + TEXTURE_FFT_PING);
+//    glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
 
 	// filtering
 	glBindFramebuffer(GL_FRAMEBUFFER, framebuffers[FRAMEBUFFER_GAUSS]);
@@ -277,8 +251,9 @@ void Ocean::draw( GLFWwindow *win)
 	glViewport(0, 0, FFT_SIZE, FFT_SIZE);
 	glUseProgram(programs[PROGRAM_WHITECAP_PRECOMPUTE]->program);
     
-    glActiveTexture(GL_TEXTURE0 + TEXTURE_FFT_PING);
-	glBindTexture(GL_TEXTURE_2D_ARRAY, textures[TEXTURE_FFT_PING]);
+//    glActiveTexture(GL_TEXTURE0 + TEXTURE_FFT_PING);
+//	glBindTexture(GL_TEXTURE_2D_ARRAY, textures[TEXTURE_FFT_PING]);
+//    
     
 	glUniform1i(glGetUniformLocation(programs[PROGRAM_WHITECAP_PRECOMPUTE]->program, "fftWavesSampler"), TEXTURE_FFT_PING);
     glUniform4f(glGetUniformLocation(programs[PROGRAM_WHITECAP_PRECOMPUTE]->program, "choppy"), choppy_factor0, choppy_factor1, choppy_factor2, choppy_factor3);
@@ -288,6 +263,7 @@ void Ocean::draw( GLFWwindow *win)
 	glActiveTexture(GL_TEXTURE0 + TEXTURE_GAUSSZ);
 	glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
 
+    //////////////////////////////////////////
 	// Final Rendering
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 	glDrawBuffer(GL_BACK);
@@ -299,9 +275,14 @@ void Ocean::draw( GLFWwindow *win)
 
     //update shader
 	glUseProgram(programs[PROGRAM_RENDER]->program);
+    glActiveTexture(GL_TEXTURE0 + skytex);
+    glGenerateMipmap(GL_TEXTURE_2D);
     
-    glActiveTexture(GL_TEXTURE0 + TEXTURE_SLOPE_VARIANCE);
-	glBindTexture(GL_TEXTURE_3D, textures[TEXTURE_SLOPE_VARIANCE]);
+    glBindTexture(GL_TEXTURE_2D, skytex);
+    glUniform1i(glGetUniformLocation(programs[PROGRAM_RENDER]->program, "skyIrradianceSampler"), skytex);
+    
+//    glActiveTexture(GL_TEXTURE0 + TEXTURE_SLOPE_VARIANCE);
+//	glBindTexture(GL_TEXTURE_3D, textures[TEXTURE_SLOPE_VARIANCE]);
     
     glUniform1i(glGetUniformLocation(programs[PROGRAM_RENDER]->program, "slopeVarianceSampler"), TEXTURE_SLOPE_VARIANCE);
     
@@ -348,7 +329,7 @@ void Ocean::draw( GLFWwindow *win)
     glDisable(GL_CULL_FACE);
 
     // turn of whatever we turned on
-    glBindTexture(GL_TEXTURE_2D, 0);
+//    glBindTexture(GL_TEXTURE_2D, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
     glUseProgram(0);
@@ -484,9 +465,7 @@ void Ocean::loadPrograms()
 	}
     programs[PROGRAM_RENDER] = new Program(1, files, options);
 	glUseProgram(programs[PROGRAM_RENDER]->program);
-	glUniform1i(glGetUniformLocation(programs[PROGRAM_RENDER]->program, "skySampler"), TEXTURE_SKY);
-//	glUniform1i(glGetUniformLocation(programs[PROGRAM_RENDER]->program, "slopeVarianceSampler"), TEXTURE_SLOPE_VARIANCE);
-//	glUniform1i(glGetUniformLocation(programs[PROGRAM_RENDER]->program, "foamDistribution"), TEXTURE_GAUSSZ);
+    
     glUniform1f(glGetUniformLocation(programs[PROGRAM_RENDER]->program, "hdrExposure"), hdrExposure);
 	glUniform1f(glGetUniformLocation(programs[PROGRAM_RENDER]->program, "jacobian_scale"), jacobian_scale);
     glUniform3f(glGetUniformLocation(programs[PROGRAM_RENDER]->program, "seaColor"), 0, 0.5, 0.8);
@@ -518,8 +497,8 @@ void Ocean::loadPrograms()
 	}
 	programs[PROGRAM_INIT] = new Program(1, files);
 	glUseProgram(programs[PROGRAM_INIT]->program);
-//	glUniform1i(glGetUniformLocation(programs[PROGRAM_INIT]->program, "spectrum_1_2_Sampler"), TEXTURE_SPECTRUM12);
-//	glUniform1i(glGetUniformLocation(programs[PROGRAM_INIT]->program, "spectrum_3_4_Sampler"), TEXTURE_SPECTRUM34);
+	glUniform1i(glGetUniformLocation(programs[PROGRAM_INIT]->program, "spectrum_1_2_Sampler"), TEXTURE_SPECTRUM12);
+	glUniform1i(glGetUniformLocation(programs[PROGRAM_INIT]->program, "spectrum_3_4_Sampler"), TEXTURE_SPECTRUM34);
     glUniform1f(glGetUniformLocation(programs[PROGRAM_INIT]->program, "FFT_SIZE"),FFT_SIZE);
 	glUniform4f(glGetUniformLocation(programs[PROGRAM_INIT]->program, "INVERSE_GRID_SIZES"),
 		        2.0 * M_PI * FFT_SIZE / GRID1_SIZE,
@@ -549,8 +528,7 @@ void Ocean::loadPrograms()
 	programs[PROGRAM_FFTX] = new Program(1, files);
 	//glProgramParameteri(programs[PROGRAM_FFTX]->program, GL_GEOMETRY_VERTICES_OUT, 24);
     //printf("33# %d​\n", glGetError());
-
-	glLinkProgram(programs[PROGRAM_FFTX]->program);
+	//glLinkProgram(programs[PROGRAM_FFTX]->program);
     glUseProgram(programs[PROGRAM_FFTX]->program);
 //    glBindTexture(GL_TEXTURE_2D, textures[TEXTURE_BUTTERFLY]);
 	glUniform1i(glGetUniformLocation(programs[PROGRAM_FFTX]->program, "butterflySampler"), TEXTURE_BUTTERFLY);
@@ -564,7 +542,7 @@ void Ocean::loadPrograms()
 	}
 	programs[PROGRAM_FFTY] = new Program(1, files);
 	//glProgramParameteri(programs[PROGRAM_FFTY]->program, GL_GEOMETRY_VERTICES_OUT, 24);
-	glLinkProgram(programs[PROGRAM_FFTY]->program);
+	//glLinkProgram(programs[PROGRAM_FFTY]->program);
 	glUseProgram(programs[PROGRAM_FFTY]->program);
 	glUniform1i(glGetUniformLocation(programs[PROGRAM_FFTY]->program, "butterflySampler"), TEXTURE_BUTTERFLY);
     
@@ -807,6 +785,8 @@ void Ocean::computeSlopeVarianceTex()
     glViewport(0, 0, N_SLOPE_VARIANCE, N_SLOPE_VARIANCE);
     
     glUseProgram(programs[PROGRAM_VARIANCES]->program);
+//    glUniform1i(glGetUniformLocation(programs[PROGRAM_VARIANCES]->program, "spectrum_1_2_Sampler"), TEXTURE_SPECTRUM12);
+//	glUniform1i(glGetUniformLocation(programs[PROGRAM_VARIANCES]->program, "spectrum_3_4_Sampler"), TEXTURE_SPECTRUM34);
     glUniform4f(glGetUniformLocation(programs[PROGRAM_VARIANCES]->program, "GRID_SIZES"), GRID1_SIZE, GRID2_SIZE, GRID3_SIZE, GRID4_SIZE);
     glUniform1f(glGetUniformLocation(programs[PROGRAM_VARIANCES]->program, "slopeVarianceDelta"), theoreticSlopeVariance - totalSlopeVariance);
     
@@ -941,9 +921,13 @@ void Ocean::simulateFFTWaves(float t)
 
  	glViewport(0, 0, FFT_SIZE, FFT_SIZE);
 	glUseProgram(programs[PROGRAM_INIT]->program);
+    
+//    glActiveTexture(GL_TEXTURE0 + TEXTURE_SPECTRUM12);
     glBindTexture(GL_TEXTURE_2D, textures[TEXTURE_SPECTRUM12]);
 	glUniform1i(glGetUniformLocation(programs[PROGRAM_SHOW_SPECTRUM]->program, "spectrum_1_2_Sampler"), TEXTURE_SPECTRUM12);
-    glBindTexture(GL_TEXTURE_2D, textures[TEXTURE_SPECTRUM12]);
+    
+//    glActiveTexture(GL_TEXTURE0 + TEXTURE_SPECTRUM34);
+    glBindTexture(GL_TEXTURE_2D, textures[TEXTURE_SPECTRUM34]);
 	glUniform1i(glGetUniformLocation(programs[PROGRAM_SHOW_SPECTRUM]->program, "spectrum_3_4_Sampler"), TEXTURE_SPECTRUM34);
 	glUniform1f(glGetUniformLocation(programs[PROGRAM_INIT]->program, "t"), t);
 
@@ -951,13 +935,9 @@ void Ocean::simulateFFTWaves(float t)
     
     // fft passes
 	glBindFramebuffer(GL_FRAMEBUFFER, framebuffers[FRAMEBUFFER_FFT1]);
- 
-//    glBindTexture(GL_TEXTURE_2D_ARRAY, textures[TEXTURE_FFT_PING]);
-//    glBindTexture(GL_TEXTURE_2D_ARRAY, textures[TEXTURE_FFT_PONG]);
-//    glActiveTexture(GL_TEXTURE0 + TEXTURE_BUTTERFLY);
     
 	glUseProgram(programs[PROGRAM_FFTX]->program);
-//    glBindTexture(GL_TEXTURE_2D, textures[TEXTURE_BUTTERFLY]);
+
 //	glUniform1i(glGetUniformLocation(programs[PROGRAM_FFTX]->program, "butterflySampler"), TEXTURE_BUTTERFLY);
     
 	glUniform1i(glGetUniformLocation(programs[PROGRAM_FFTX]->program, "nLayers"), choppy ? 8 : 3);
@@ -980,7 +960,7 @@ void Ocean::simulateFFTWaves(float t)
 	}
     
 	glUseProgram(programs[PROGRAM_FFTY]->program);
-//    glBindTexture(GL_TEXTURE_2D, textures[TEXTURE_BUTTERFLY]);
+
 //	glUniform1i(glGetUniformLocation(programs[PROGRAM_FFTX]->program, "butterflySampler"), TEXTURE_BUTTERFLY);
     
 	glUniform1i(glGetUniformLocation(programs[PROGRAM_FFTY]->program, "nLayers"), choppy ? 8 : 3);

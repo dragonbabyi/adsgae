@@ -193,7 +193,7 @@ void Skydome::updateShader()
     glUniform1i(glGetUniformLocation(skydomeShader[1]->program, "skySample2D"), skytexture);
 
     // turn off everything we enabled
-    glBindTexture(GL_TEXTURE_2D, 0);  //0
+//    glBindTexture(GL_TEXTURE_2D, 0);  //0
     glBindVertexArray(0);
     glUseProgram(0);
 
@@ -235,7 +235,7 @@ void Skydome::draw( GLFWwindow *win, float theta) {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferIDs[QUAD_INDEX_BUFFER]);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
     
-    glBindTexture(GL_TEXTURE_2D, 0);
+//    glBindTexture(GL_TEXTURE_2D, 0);
     glUseProgram(0);
     
     //debug
@@ -292,7 +292,7 @@ void Skydome::draw( GLFWwindow *win, float theta) {
     glActiveTexture(GL_TEXTURE0 + skytexture);
     glGenerateMipmap(GL_TEXTURE_2D);
     
-    glBindTexture(GL_TEXTURE_2D, skytexture);
+//    glBindTexture(GL_TEXTURE_2D, skytexture);
     glUniform1i(glGetUniformLocation(skydomeShader[1]->program, "skySample2D"), skytexture);
     
     glBindVertexArray(varrayIDs[VARRAY]);
@@ -302,7 +302,7 @@ void Skydome::draw( GLFWwindow *win, float theta) {
 //    glDisable(GL_CULL_FACE);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-    glBindTexture(GL_TEXTURE_2D, 0);
+//    glBindTexture(GL_TEXTURE_2D, 0);
     glBindVertexArray(0);
     glUseProgram(0);
 

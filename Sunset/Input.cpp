@@ -95,6 +95,16 @@ void Input::keyPress(GLFWwindow *win, int key, Scene *scene, Skydome *skydome, O
         case 'W':
             scene->camera.velz = fmin(1.0f, scene->camera.velz + 1.0f);
             break;
+            
+        case 'B':
+            //            scene->sunThetaVel = 1.0;
+            scene->sunTheta += 0.01;
+            break;
+        case 'N':
+            //            scene->sunThetaVel = -1.0;
+            scene->sunTheta -= 0.01;
+            break;
+            
         //lookat direction
         case GLFW_KEY_UP:
             //scene->camera.theta = fmin(scene->camera.theta + 1.0f, 90.0f - 0.001f);

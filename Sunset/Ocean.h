@@ -28,7 +28,7 @@ enum {
     TEXTURE_FFT_PONG,
     TEXTURE_BUTTERFLY,
     TEXTURE_GAUSSZ,
-    TEXTURE_SKY,
+//    TEXTURE_SKY,
     TEXTURE_COUNT,
     
     // GL vertex array object IDs
@@ -50,7 +50,7 @@ enum {
     // framebuffers
     FRAMEBUFFER_FFT0 = 0,
     FRAMEBUFFER_FFT1,
-    FRAMEBUFFER_SKY,
+//    FRAMEBUFFER_SKY,
     FRAMEBUFFER_VARIANCES,
     FRAMEBUFFER_GAUSS,
     FRAMEBUFFER_COUNT,
@@ -104,10 +104,10 @@ public:
     void drawQuad(int programindex);
     
     void updateShader();
-    void draw(GLFWwindow *win);
+    void draw(GLFWwindow *win, unsigned int skytex);
     
     //debug
-    void drawToScreen(GLFWwindow *win);
+//    void drawToScreen(GLFWwindow *win);
 };
 
 

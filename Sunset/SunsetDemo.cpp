@@ -174,7 +174,7 @@ int main(int argc, char *argv[])
         
         
         appctx.sky->draw(win, appctx.scene->sunTheta);
-        appctx.ocean->draw(win);
+        appctx.ocean->draw(win, appctx.sky->skytexture);
         
         // show what we drew
         glfwSwapBuffers(win);

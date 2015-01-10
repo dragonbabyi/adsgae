@@ -172,8 +172,9 @@ int main(int argc, char *argv[])
         //        vboParams.w = camera.theta;
         //    }
         
-        appctx.ocean->draw(win);
+//        appctx.ocean->draw(win);
         appctx.sky->draw(win, appctx.scene->sunTheta);
+        appctx.ocean->draw(win);
         
         // show what we drew
         glfwSwapBuffers(win);

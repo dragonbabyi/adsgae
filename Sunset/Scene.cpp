@@ -33,12 +33,13 @@ Scene::Scene(GLFWwindow *win)
     camera.velz		= 0.0f;
     camera.x		= 0.0f;
     camera.y		= 0.0f;
-    camera.theta 	= 27.0f; //27.0f  in degree    +: looking up
+    camera.theta 	= 2.0f; //27.0f  in degree    +: looking up
     camera.phi 		= 2.f;  //-625.0f
-    camera.fovy 	= 30.0f;
+    camera.fovy 	= 5.0f;//atan(14/len_mm)
+    // 22mm lens ~ 32.0f  200mm ~~ 4.0f
     camera.vel		= 2.0f;
     
-    sunTheta = 80.0 * M_PI / 180.0;
+    sunTheta = 88.0 * M_PI / 180.0;
     sunPhi = 0.0;
     
 //    if(vboParams.x != width ||

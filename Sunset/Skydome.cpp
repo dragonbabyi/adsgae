@@ -193,7 +193,7 @@ void Skydome::draw( GLFWwindow *win, float theta) {
 //    glDisable(GL_CULL_FACE);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-    glBindTexture(GL_TEXTURE_1D, 0);
+//    glBindTexture(GL_TEXTURE_1D, 0);
     glBindVertexArray(0);
     glUseProgram(0);
 

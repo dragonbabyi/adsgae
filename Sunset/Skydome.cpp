@@ -75,7 +75,6 @@ Skydome::Skydome() {
     turbidity = 8.0;
     albedo = 0.03;
     init = false;
-//    HosekSkyModel_Configuration();
     
     //////////////////////  create meshes (hemishpere)  //////////////////////////
     
@@ -137,7 +136,8 @@ Skydome::~Skydome() {
 
 void Skydome::loadProgram() {
     char* files[1];
-    files[0] = "Shader/skydome1.glsl";
+//    files[0] = "Shader/skydome1.glsl";
+    files[0] = "Shader/skydome.glsl";
 //    if (skydomeShader[0] != NULL) {
 //        delete skydomeShader[0];
 //        skydomeShader[0] = NULL;
@@ -145,7 +145,8 @@ void Skydome::loadProgram() {
     skydomeShader[0] = new Program(1, files);
     
     // second shader
-    files[0] = "Shader/tonemapping.glsl";
+//    files[0] = "Shader/tonemapping.glsl";
+    files[0] = "Shader/sun.glsl";
     
     skydomeShader[1] = new Program(1, files);
 

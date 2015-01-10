@@ -14,6 +14,9 @@
 #include "Ocean.h"
 #include "Program.h"
 
+#include <iostream>
+#include <fstream>
+
 // using core modern OpenGL
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
@@ -143,9 +146,27 @@ int main(int argc, char *argv[])
     appctx.input = new Input;
     appctx.sky = new Skydome();
     appctx.ocean = new Ocean(win);
+    
+    // get time
+    std::ofstream myfile;
+    myfile.open ("timeTable.txt");
+    myfile << " time table \n";
+    
+    double lastTime = glfwGetTime();
+    int nbFrames = 0;
 
     //all program should be initialized
     while (!glfwWindowShouldClose(win)) {
+        
+        // Measure speed
+        double currentTime = glfwGetTime();
+        nbFrames++;
+        if ( currentTime - lastTime >= 1.0 ){ // If last prinf() was more than 1 sec ago
+            // printf and reset timer
+            myfile << 1000.0/double(nbFrames) << " ms/frame \n";
+            nbFrames = 0;
+            lastTime += 1.0;
+        }
         
         // check for continuous key updates to view
         appctx.input->keyUpdate(appctx.scene);
@@ -183,7 +204,7 @@ int main(int argc, char *argv[])
 
     }
 
-    
+    myfile.close();
     glfwDestroyWindow(win);
     glfwTerminate();
     

@@ -19,6 +19,7 @@
 
 //data file
 #include "ArHosekSkyModelData_CIEXYZ.h"
+#include "Htrue.h"
 
 // using core modern OpenGL
 #include <GL/glew.h>
@@ -42,11 +43,15 @@ Skydome::Skydome() {
     glGenTextures(1, &skytexture);
     glActiveTexture(GL_TEXTURE0 + skytexture);
 	glBindTexture(GL_TEXTURE_2D, skytexture);
-    
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, skyTexSize, skyTexSize, 0, GL_RGBA, GL_FLOAT, 0);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glGenerateMipmapEXT(GL_TEXTURE_2D);
+    
+    glGenTextures(1, &htex);
+    glActiveTexture(GL_TEXTURE0 + htex);
+	glBindTexture(GL_TEXTURE_2D, htex);
+    glTexImage1D(GL_TEXTURE_1D, 0, GL_R32F, 128, 0, GL_RED, GL_FLOAT, htrue);
     
     //depth
     glGenRenderbuffers(1, &depthrenderbuffer);
@@ -132,12 +137,13 @@ Skydome::~Skydome() {
 //    glDeleteProgram(skydomeShader);
     glDeleteBuffers(NUM_BUFFERS, bufferIDs);
     glDeleteTextures(1, &skytexture);
+    glDeleteTextures(1, &htex);
 }
 
 void Skydome::loadProgram() {
     char* files[1];
-//    files[0] = "Shader/skydome1.glsl";
-    files[0] = "Shader/skydome.glsl";
+    files[0] = "Shader/skydome1.glsl";
+//    files[0] = "Shader/skydome.glsl";
 //    if (skydomeShader[0] != NULL) {
 //        delete skydomeShader[0];
 //        skydomeShader[0] = NULL;
@@ -145,8 +151,8 @@ void Skydome::loadProgram() {
     skydomeShader[0] = new Program(1, files);
     
     // second shader
-//    files[0] = "Shader/tonemapping.glsl";
-    files[0] = "Shader/sun.glsl";
+    files[0] = "Shader/tonemapping.glsl";
+//    files[0] = "Shader/sun.glsl";
     
     skydomeShader[1] = new Program(1, files);
 
@@ -193,6 +199,10 @@ void Skydome::updateShader()
     //skytexture
     glBindTexture(GL_TEXTURE_2D, skytexture);
     glUniform1i(glGetUniformLocation(skydomeShader[1]->program, "skySample2D"), skytexture);
+    
+    // reference data
+    glBindTexture(GL_TEXTURE_1D, htex);
+    glUniform1i(glGetUniformLocation(skydomeShader[1]->program, "htrueSampler"), htex);
 
     // turn off everything we enabled
 //    glBindTexture(GL_TEXTURE_2D, 0);  //0

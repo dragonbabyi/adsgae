@@ -198,8 +198,8 @@ void Ocean::draw( GLFWwindow *win, unsigned int skytex)
     ///////////////////////////////////////////////////////
     // solve fft
     simulateFFTWaves(t);
-//	glActiveTexture(GL_TEXTURE0 + TEXTURE_FFT_PING);
-//    glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
+	glActiveTexture(GL_TEXTURE0 + TEXTURE_FFT_PING);
+    glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
 
     //////////////////////////////////////////
 	// Final Rendering
@@ -219,11 +219,11 @@ void Ocean::draw( GLFWwindow *win, unsigned int skytex)
     glBindTexture(GL_TEXTURE_2D, skytex);
     glUniform1i(glGetUniformLocation(programs[PROGRAM_RENDER]->program, "skySampler"), skytex);
     
-    glActiveTexture(GL_TEXTURE0 + TEXTURE_SLOPE_VARIANCE);   ///// white-ish??
+    glActiveTexture(GL_TEXTURE0 + TEXTURE_SLOPE_VARIANCE);   ///// ??
     glBindTexture(GL_TEXTURE_2D, TEXTURE_SLOPE_VARIANCE);
     glUniform1i(glGetUniformLocation(programs[PROGRAM_RENDER]->program, "slopeVarianceSampler"), TEXTURE_SLOPE_VARIANCE);
     
-//	glBindTexture(GL_TEXTURE_2D_ARRAY, textures[TEXTURE_FFT_PING]);
+	glBindTexture(GL_TEXTURE_2D_ARRAY, textures[TEXTURE_FFT_PING]);
 	glUniform1i(glGetUniformLocation(programs[PROGRAM_RENDER]->program, "fftWavesSampler"), TEXTURE_FFT_PING);
     
     glUniformBlockBinding(programs[PROGRAM_RENDER]->program,
@@ -685,7 +685,7 @@ void Ocean::computeSlopeVarianceTex()
     }
     
     glBindFramebuffer(GL_FRAMEBUFFER, framebuffers[FRAMEBUFFER_VARIANCES]);
-    glDrawBuffer(GL_COLOR_ATTACHMENT0);
+//    glDrawBuffer(GL_COLOR_ATTACHMENT0);
     glViewport(0, 0, N_SLOPE_VARIANCE, N_SLOPE_VARIANCE);
     
     glUseProgram(programs[PROGRAM_VARIANCES]->program);

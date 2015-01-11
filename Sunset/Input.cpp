@@ -97,12 +97,12 @@ void Input::keyPress(GLFWwindow *win, int key, Scene *scene, Skydome *skydome, O
             break;
             
         case 'B':
-            //            scene->sunThetaVel = 1.0;
-            scene->sunTheta += 0.01;
+            scene->sunThetaVel = 1;
+            // scene->sunTheta += 0.01;
             break;
         case 'N':
-            //            scene->sunThetaVel = -1.0;
-            scene->sunTheta -= 0.01;
+            scene->sunThetaVel = -1;
+            // scene->sunTheta -= 0.01;
             break;
             
         //lookat direction
@@ -160,7 +160,14 @@ void Input::keyRelease(GLFWwindow *win, int key, Scene *scene)
         case 'W':
             scene->camera.velz = fmax(-1.0f, scene->camera.velz - 1.0f);
             break;
-        
+            
+        case 'B':
+            scene->sunThetaVel = 0;
+            break;
+        case 'N':
+            scene->sunThetaVel = 0;
+            break;
+            
         //lookat direction
         case GLFW_KEY_UP:
             //scene->camera.theta = fmin(scene->camera.theta + 1.0f, 90.0f - 0.001f);
@@ -187,7 +194,7 @@ void Input::keyRelease(GLFWwindow *win, int key, Scene *scene)
 //
 void Input::keyUpdate(Scene *scene)
 {
-    if (scene->camera.velx != 0 || scene->camera.vely != 0 || scene->camera.velz != 0 || scene->camera.velt != 0|| scene->camera.velp != 0) {
+    if (scene->camera.velx != 0 || scene->camera.vely != 0 || scene->camera.velz != 0 || scene->camera.velt != 0|| scene->camera.velp != 0 || scene->sunThetaVel != 0) {
         double now = glfwGetTime();
         double delta = (now - updateTime);
         
@@ -210,7 +217,9 @@ void Input::keyUpdate(Scene *scene)
         if(scene->camera.z  < 0.2f)
             scene->camera.z = 0.2f;
         
-        //scene->sunmove();
+        if (scene->sunThetaVel != 0) {
+            scene->sunTheta += scene->sunThetaVel * delta/100.0;
+        }
         
         // remember time for next update
         updateTime = now;

@@ -46,6 +46,7 @@ private:
     Program* skydomeShader[2];   //1 scattering 2 tone mapping
     
 public:
+    GLuint htex;  // htrue--happ
     GLuint skytexture;
     unsigned int skyTexSize;
     bool init;

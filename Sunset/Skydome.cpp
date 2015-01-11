@@ -211,7 +211,7 @@ void Skydome::draw( GLFWwindow *win, float theta) {
         HosekSkyModel_Configuration( solarElevation );
         init = true;
     }
-    else if ( abs(theta + solarElevation - M_PI/2.0) < 1e-8) {   //recompute the configuration if the sunTheta changes
+    else if ( abs(theta + solarElevation - M_PI/2.0) > 1e-8) {   //recompute the configuration if the sunTheta changes
         solarElevation = M_PI/2.0 - theta;
         HosekSkyModel_Configuration( solarElevation );
     }

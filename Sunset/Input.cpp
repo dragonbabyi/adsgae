@@ -60,7 +60,6 @@ void Input::mouseMove(GLFWwindow *win, Scene *scene, double x, double y)
             scene->sunTheta += dy / 400.0;
         }
         
-//        printf("%f\n", scene->sunTheta);
     }
     
     // update prior mouse state
@@ -218,7 +217,8 @@ void Input::keyUpdate(Scene *scene)
             scene->camera.z = 0.2f;
         
         if (scene->sunThetaVel != 0 && scene->sunTheta < 92.0) {
-            scene->sunTheta += scene->sunThetaVel * delta/100.0;
+            scene->sunTheta += scene->sunThetaVel * delta/1000.0;
+//            printf("%f\n", scene->sunTheta);
         }
         
         // remember time for next update

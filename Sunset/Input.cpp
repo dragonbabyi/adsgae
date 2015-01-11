@@ -217,7 +217,7 @@ void Input::keyUpdate(Scene *scene)
         if(scene->camera.z  < 0.2f)
             scene->camera.z = 0.2f;
         
-        if (scene->sunThetaVel != 0) {
+        if (scene->sunThetaVel != 0 && scene->sunTheta < 92.0) {
             scene->sunTheta += scene->sunThetaVel * delta/100.0;
         }
         

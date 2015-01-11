@@ -77,7 +77,7 @@ Skydome::Skydome() {
     
     //default
     solarElevation = M_PI/2.0;
-    turbidity = 8.0;
+    turbidity = 6.7;
     albedo = 0.03;
     init = false;
     
@@ -142,20 +142,12 @@ Skydome::~Skydome() {
 
 void Skydome::loadProgram() {
     char* files[1];
-    files[0] = "Shader/skydome1.glsl";
-//    files[0] = "Shader/skydome.glsl";
-//    if (skydomeShader[0] != NULL) {
-//        delete skydomeShader[0];
-//        skydomeShader[0] = NULL;
-//    }
+    files[0] = "Shader/skydome.glsl";
     skydomeShader[0] = new Program(1, files);
     
     // second shader
     files[0] = "Shader/tonemapping.glsl";
-//    files[0] = "Shader/sun.glsl";
-    
     skydomeShader[1] = new Program(1, files);
-
 }
 
 

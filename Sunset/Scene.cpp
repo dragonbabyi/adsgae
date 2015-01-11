@@ -27,7 +27,7 @@ Scene::Scene(GLFWwindow *win)
     glBufferData(GL_UNIFORM_BUFFER, sizeof(UniformMatrix), 0, GL_STREAM_DRAW);
     glBindBufferBase(GL_UNIFORM_BUFFER, AppContext::MATRIX_UNIFORMS, bufferIDs[MATRIX_BUFFER]);
     
-    camera.z 	    = 3.5f;
+    camera.z 	    = 35.0f;
     camera.velx		= 0.0f;
     camera.vely		= 0.0f;
     camera.velz		= 0.0f;
@@ -35,11 +35,10 @@ Scene::Scene(GLFWwindow *win)
     camera.y		= 0.0f;
     camera.theta 	= -2.0f; //27.0f  in degree    +: looking up
     camera.phi 		= 2.f;  //-625.0f
-    camera.fovy 	= 15.0f;//atan(14/len_mm)
-    // 22mm lens ~ 32.0f  200mm ~~ 4.0f
+    camera.fovy 	= 10.0f;//atan(14/len_mm)  // 22mm lens ~ 32.0f  200mm ~~ 4.0f
     camera.vel		= 2.0f;
     
-    sunTheta = 80.0 * M_PI / 180.0;
+    sunTheta = 88.0 * M_PI / 180.0;
     sunPhi = 0.0;
     sunThetaVel = 0;
     
@@ -99,7 +98,7 @@ void Scene::sunmove()
 {
     //update sun position
 //    float sunRadius = 695800.0;
-    float sunDistance = 149600000;   //(km)
+    float sunDistance = 149600000.0;   //(km)
     uMatrix.sunpos = vec4f(sin(sunTheta) * cos(sunPhi)*sunDistance , sin(sunTheta) * sin(sunPhi)*sunDistance , cos(sunTheta)*sunDistance , sunTheta);
  
 }

@@ -89,22 +89,6 @@ Ocean::Ocean(GLFWwindow *win)
     
     float maxAnisotropy = 1.0f;
     
-    
-	// Textures
-	float *data = new float[256*64*3];
-	FILE *f = fopen("data/transmittance.raw", "rb");
-	fread(data, 1, 256*64*3*sizeof(float), f);
-	fclose(f);
-	glActiveTexture(GL_TEXTURE0 + TEXTURE_TRANSMITTANCE);
-	glBindTexture(GL_TEXTURE_2D, textures[TEXTURE_TRANSMITTANCE]);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glBindBuffer(GL_PIXEL_UNPACK_BUFFER_ARB, 0);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB16F_ARB, 256, 64, 0, GL_RGB, GL_FLOAT, data);
-	delete[] data;
-    
 	glActiveTexture(GL_TEXTURE0 + TEXTURE_SPECTRUM12);
 	glBindTexture(GL_TEXTURE_2D, textures[TEXTURE_SPECTRUM12]);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -157,7 +141,7 @@ Ocean::Ocean(GLFWwindow *win)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
     //generate data and initial texture
-    data = computeButterflyLookupTexture();
+    float *data = computeButterflyLookupTexture();
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, FFT_SIZE, PASSES, 0, GL_RGBA, GL_FLOAT, data);
 	delete[] data;
 
@@ -411,9 +395,6 @@ void Ocean::loadPrograms()
 	}
     programs[PROGRAM_RENDER] = new Program(1, files, options);
 	glUseProgram(programs[PROGRAM_RENDER]->program);
-    
-    
-	glUniform1i(glGetUniformLocation(programs[PROGRAM_RENDER]->program, "transmittanceSampler"), TEXTURE_TRANSMITTANCE);
     
     glUniform1f(glGetUniformLocation(programs[PROGRAM_RENDER]->program, "hdrExposure"), hdrExposure);
 	glUniform1f(glGetUniformLocation(programs[PROGRAM_RENDER]->program, "jacobian_scale"), jacobian_scale);

@@ -56,10 +56,10 @@ void Input::mouseMove(GLFWwindow *win, Scene *scene, double x, double y)
 //		scene->sunTheta += dy / 400.0;
         // set limit: sunPhi [0, 2*M_PI], sunTheta [-M_PI/2, M_PI/2]  // * M_PI / 180.0
         // don't allow move across the zenith, allow move below the horizon
-        if (scene->sunTheta + dy / 400.0 > 0 && scene->sunTheta + dy / 400.0 < 2.5) {
+        if (scene->sunTheta + dy/400.0 > 0.01 && scene->sunTheta + dy/400.0 < 1.6) {
             scene->sunTheta += dy / 400.0;
         }
-        
+        printf("%f\n", scene->sunTheta);
     }
     
     // update prior mouse state
@@ -216,7 +216,7 @@ void Input::keyUpdate(Scene *scene)
         if(scene->camera.z  < 0.2f)
             scene->camera.z = 0.2f;
         
-        if (scene->sunThetaVel != 0 && scene->sunTheta < 92.0) {
+        if (scene->sunThetaVel != 0 && scene->sunTheta > 0.0 && scene->sunTheta < 1.65) {
             scene->sunTheta += scene->sunThetaVel * delta/1000.0;
 //            printf("%f\n", scene->sunTheta);
         }

@@ -35,7 +35,7 @@ Scene::Scene(GLFWwindow *win)
     camera.y		= 0.0f;
     camera.theta 	= -1.0f;
     camera.phi 		= 2.f;
-    camera.fovy 	= 15.0f;//atan(14/len_mm)  // 22mm lens ~ 32.0f  200mm ~~ 4.0f
+    camera.fovy 	= 5.0f;//atan(14/len_mm)  // 22mm lens ~ 32.0f  200mm ~~ 4.0f
     camera.vel		= 2.0f;
     
     sunTheta = 89.0 * M_PI / 180.0;

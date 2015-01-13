@@ -50,8 +50,10 @@ Skydome::Skydome() {
     
     glGenTextures(1, &htex);
     glActiveTexture(GL_TEXTURE0 + htex);
-	glBindTexture(GL_TEXTURE_2D, htex);
-    glTexImage1D(GL_TEXTURE_1D, 0, GL_R32F, 128, 0, GL_RED, GL_FLOAT, htrue);
+	glBindTexture(GL_TEXTURE_1D, htex);
+    glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA32F, 256, 0, GL_RED, GL_FLOAT, htrue);
+    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     
     //depth
     glGenRenderbuffers(1, &depthrenderbuffer);
@@ -77,7 +79,7 @@ Skydome::Skydome() {
     
     //default
     solarElevation = M_PI/2.0;
-    turbidity = 6.7;
+    turbidity = 2.0;
     albedo = 0.03;
     init = false;
     
@@ -194,7 +196,7 @@ void Skydome::updateShader()
     
     // reference data
     glBindTexture(GL_TEXTURE_1D, htex);
-    glUniform1i(glGetUniformLocation(skydomeShader[1]->program, "htrueSampler"), htex);
+    glUniform1i(glGetUniformLocation(skydomeShader[1]->program, "htrueSample1D"), htex);
 
     // turn off everything we enabled
 //    glBindTexture(GL_TEXTURE_2D, 0);  //0
@@ -211,8 +213,8 @@ void Skydome::draw( GLFWwindow *win, float theta) {
         HosekSkyModel_Configuration( solarElevation );
         init = true;
     }
-    else if ( abs(theta + solarElevation - M_PI/2.0) > 1e-8) {   //recompute the configuration if the sunTheta changes
-        solarElevation = M_PI/2.0 - theta;
+    else //if ( abs(theta + solarElevation - M_PI/2.0) > 1e-8) {   //recompute the configuration if the sunTheta changes
+    {    solarElevation = M_PI/2.0 - theta;
         HosekSkyModel_Configuration( solarElevation );
     }
     
@@ -301,8 +303,10 @@ void Skydome::draw( GLFWwindow *win, float theta) {
     glActiveTexture(GL_TEXTURE0 + skytexture);
     glGenerateMipmap(GL_TEXTURE_2D);
     
-//    glBindTexture(GL_TEXTURE_2D, skytexture);
     glUniform1i(glGetUniformLocation(skydomeShader[1]->program, "skySample2D"), skytexture);
+    
+//    glBindTexture(GL_TEXTURE_1D, htex);
+    glUniform1i(glGetUniformLocation(skydomeShader[1]->program, "htrueSample1D"), htex);
     
     glBindVertexArray(varrayIDs[VARRAY]);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferIDs[INDEX_BUFFER]);

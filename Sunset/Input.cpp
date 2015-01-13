@@ -97,11 +97,9 @@ void Input::keyPress(GLFWwindow *win, int key, Scene *scene, Skydome *skydome, O
             
         case 'B':
             scene->sunThetaVel = 1;
-            // scene->sunTheta += 0.01;
             break;
         case 'N':
             scene->sunThetaVel = -1;
-            // scene->sunTheta -= 0.01;
             break;
             
         //lookat direction
@@ -195,6 +193,9 @@ void Input::keyUpdate(Scene *scene)
 {
     if (scene->camera.velx != 0 || scene->camera.vely != 0 || scene->camera.velz != 0 || scene->camera.velt != 0|| scene->camera.velp != 0 || scene->sunThetaVel != 0) {
         double now = glfwGetTime();
+        if ( !updateTime ) {
+            updateTime = glfwGetTime();
+        }
         double delta = (now - updateTime);
         
         // update pan based on time elapsed since last update
@@ -218,7 +219,7 @@ void Input::keyUpdate(Scene *scene)
         
         if (scene->sunThetaVel != 0 && scene->sunTheta > 0.0 && scene->sunTheta < 1.65) {
             scene->sunTheta += scene->sunThetaVel * delta/1000.0;
-//            printf("%f\n", scene->sunTheta);
+            printf("%f\n", scene->sunTheta);
         }
         
         // remember time for next update

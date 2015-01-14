@@ -89,6 +89,17 @@ Ocean::Ocean(GLFWwindow *win)
     
     float maxAnisotropy = 1.0f;
     
+    ///debug texture///////////////
+    glActiveTexture(GL_TEXTURE0 + TEXTURE_DEBUG);
+    glBindTexture(GL_TEXTURE_2D, textures[TEXTURE_DEBUG]);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, 820, 600, 0, GL_RGBA, GL_FLOAT, NULL);
+    
+    //////////////////
+    
 	glActiveTexture(GL_TEXTURE0 + TEXTURE_SPECTRUM12);
 	glBindTexture(GL_TEXTURE_2D, textures[TEXTURE_SPECTRUM12]);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -203,8 +214,24 @@ void Ocean::draw( GLFWwindow *win, unsigned int skytex)
 
     //////////////////////////////////////////
 	// Final Rendering
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-	glDrawBuffer(GL_BACK);
+    
+    /////// debug /////
+    glBindTexture(GL_TEXTURE_2D, textures[TEXTURE_DEBUG]);
+    glBindFramebuffer(GL_FRAMEBUFFER, framebuffers[debugframebuffer]);
+    glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, TEXTURE_DEBUG, 0);
+    
+    GLenum DrawBuffers[1] = {GL_COLOR_ATTACHMENT0};
+    glDrawBuffers(1, DrawBuffers);
+    
+    //check
+    if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+    {
+        printf("%d\n", glCheckFramebufferStatus(GL_FRAMEBUFFER));
+    }
+    
+    
+//    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+//	glDrawBuffer(GL_BACK);
     glViewport(0, 0, window.width, window.height);
     
 	glEnable(GL_DEPTH_TEST);
@@ -257,6 +284,18 @@ void Ocean::draw( GLFWwindow *win, unsigned int skytex)
     glDrawElements(GL_TRIANGLES, vboSize, GL_UNSIGNED_INT, 0);
 
     now = update;
+    
+    
+    /////// debug /////
+    glBindTexture(GL_TEXTURE_2D, textures[TEXTURE_DEBUG]);
+//    GLfloat *pixels = (GLfloat*) malloc(123,000 * sizeof(GLfloat) * 4);
+    GLfloat *pixels = new GLfloat[600000];
+    glReadPixels(0, 0, 820, 600, GL_RGBA, GL_FLOAT, pixels);
+    
+    for (int i=12300; i >0; i--) {
+        printf("%f  %f  %f  %f \n", pixels[4*i], pixels[4*i+1], pixels[4*i+2], pixels[4*i+3]);
+    }
+////////////////////
    
     glDisable(GL_CULL_FACE);
  
@@ -483,7 +522,8 @@ void Ocean::generateMesh()
     glBindBuffer(GL_ARRAY_BUFFER, buffers[BUFFER_GRID_VERTEX]);
     
     //float horizon = tan(camera.theta / 180.0 * M_PI);
-    float horizon = tan(27.0 / 180.0 * M_PI);
+//    float horizon = tan(27.0 / 180.0 * M_PI);
+    float horizon = tan(-1.0 / 180.0 * M_PI);
     float s = fmin(1.1f, 0.5f + horizon * 0.5f);
     
     float vmargin = 0.1;
@@ -491,6 +531,8 @@ void Ocean::generateMesh()
     
     vec4f *data = new vec4f[int(ceil(window.height * (s + vmargin) / gridSize) + 5) * int(ceil(window.width * (1.0 + 2.0 * hmargin) / gridSize) + 5)];
 //    vec4f *data = new vec4f[int(ceil(window.height * 1.2 / gridSize) + 5) * int(ceil(window.width * 1.2 / gridSize) + 5)];
+//debug1
+//    printf("%d \n", int(ceil(window.height * (s + vmargin) / gridSize) + 5) * int(ceil(window.width * (1.0 + 2.0 * hmargin) / gridSize) + 5));
     
     int n = 0;
     int nx = 0;

@@ -27,7 +27,7 @@ enum {
     TEXTURE_FFT_PING,
     TEXTURE_FFT_PONG,
     TEXTURE_BUTTERFLY,
-//    TEXTURE_TRANSMITTANCE,
+    TEXTURE_DEBUG,
 //    TEXTURE_GAUSSZ,
 //    TEXTURE_SKY,
     TEXTURE_COUNT,
@@ -54,6 +54,7 @@ enum {
 //    FRAMEBUFFER_SKY,
     FRAMEBUFFER_VARIANCES,
 //    FRAMEBUFFER_GAUSS,
+    debugframebuffer, 
     FRAMEBUFFER_COUNT,
     
     // programs

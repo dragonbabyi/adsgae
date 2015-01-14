@@ -304,8 +304,7 @@ void Skydome::draw( GLFWwindow *win, float theta) {
     glGenerateMipmap(GL_TEXTURE_2D);
     
     glUniform1i(glGetUniformLocation(skydomeShader[1]->program, "skySample2D"), skytexture);
-    
-//    glBindTexture(GL_TEXTURE_1D, htex);
+ 
     glUniform1i(glGetUniformLocation(skydomeShader[1]->program, "htrueSample1D"), htex);
     
     glBindVertexArray(varrayIDs[VARRAY]);

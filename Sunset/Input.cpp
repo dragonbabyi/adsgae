@@ -219,7 +219,7 @@ void Input::keyUpdate(Scene *scene)
         
         if (scene->sunThetaVel != 0 && scene->sunTheta > 0.0 && scene->sunTheta < 1.65) {
             scene->sunTheta += scene->sunThetaVel * delta/1000.0;
-            printf("%f\n", scene->sunTheta);
+            printf("%f   %d\n", scene->sunTheta, scene->sunThetaVel);
         }
         
         // remember time for next update

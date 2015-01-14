@@ -222,6 +222,8 @@ void Ocean::draw( GLFWwindow *win, unsigned int skytex)
     
     GLenum DrawBuffers[1] = {GL_COLOR_ATTACHMENT0};
     glDrawBuffers(1, DrawBuffers);
+ 
+    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
     
     //check
     if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
@@ -288,13 +290,16 @@ void Ocean::draw( GLFWwindow *win, unsigned int skytex)
     
     /////// debug /////
     glBindTexture(GL_TEXTURE_2D, textures[TEXTURE_DEBUG]);
-//    GLfloat *pixels = (GLfloat*) malloc(123,000 * sizeof(GLfloat) * 4);
-    GLfloat *pixels = new GLfloat[600000];
+    GLfloat *pixels = new GLfloat[1968000];
     glReadPixels(0, 0, 820, 600, GL_RGBA, GL_FLOAT, pixels);
     
-    for (int i=12300; i >0; i--) {
+    for (int i= 0; i < 492000; i++) {
+        if (pixels[4*i+3] >  0.2 && pixels[4*i+3] < 0.9 ) {
         printf("%f  %f  %f  %f \n", pixels[4*i], pixels[4*i+1], pixels[4*i+2], pixels[4*i+3]);
+    
+        }
     }
+    
 ////////////////////
    
     glDisable(GL_CULL_FACE);

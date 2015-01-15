@@ -179,27 +179,11 @@ int main(int argc, char *argv[])
         
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         
-        //////////////////////////////////////
-        //    if(vboParams.x != width ||
-        //       vboParams.y != height ||
-        //       vboParams.z != gridSize ||
-        //       vboParams.w != camera.theta)
-        //    {
-        //        generateMesh();
-        //
-        //        vboParams.x = width;
-        //        vboParams.y = height;
-        //        vboParams.z = gridSize;
-        //        vboParams.w = camera.theta;
-        //    }
-        
-        
         appctx.sky->draw(win, appctx.scene->sunTheta);
-        appctx.ocean->draw(win, appctx.sky->skytexture);
+        appctx.ocean->draw(win, appctx.scene->camera.theta, appctx.sky->skytexture);
         
         // show what we drew
         glfwSwapBuffers(win);
- 
         glfwPollEvents();
 
     }

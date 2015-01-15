@@ -27,33 +27,21 @@ Scene::Scene(GLFWwindow *win)
     glBufferData(GL_UNIFORM_BUFFER, sizeof(UniformMatrix), 0, GL_STREAM_DRAW);
     glBindBufferBase(GL_UNIFORM_BUFFER, AppContext::MATRIX_UNIFORMS, bufferIDs[MATRIX_BUFFER]);
     
-    camera.z 	    = 3.5f;   
+    camera.z 	    = 5.0f;  //3.5f;
     camera.velx		= 0.0f;
     camera.vely		= 0.0f;
     camera.velz		= 0.0f;
     camera.x		= 0.0f;
     camera.y		= 0.0f;
-    camera.theta 	= -1.0f;
+    camera.theta 	= -2.0f;   //-1.0f;
     camera.phi 		= 2.f;
-    camera.fovy 	= 5.0f;//atan(14/len_mm)  // 22mm lens ~ 32.0f  200mm ~~ 4.0f
+    camera.fovy 	= 45.0f;//atan(14/len_mm)  // 22mm lens ~ 32.0f  200mm ~~ 4.0f
     camera.vel		= 2.0f;
     
     sunTheta = 89.0 * M_PI / 180.0;
     sunPhi = 0.0;
     sunThetaVel = 0;
     
-//    if(vboParams.x != width ||
-//       vboParams.y != height ||
-//       vboParams.z != gridSize ||
-//       vboParams.w != camera.theta)
-//    {
-//        generateMesh();
-//        
-//        vboParams.x = width;
-//        vboParams.y = height;
-//        vboParams.z = gridSize;
-//        vboParams.w = camera.theta;
-//    }
     // update view
     viewport(win);
     view();
@@ -88,10 +76,17 @@ void Scene::view()
                        -1.0, 0.0, 0.0, -camera.y,
                        0.0, 0.0, 0.0, 1.0
                        );
+    
+    //inverse
+//    right up forward position
+//    1	0	0	-1	0
+//    2	-1	0	0	0
+//    3	0	1	0	3.5
+//    4	0	0	0	1
    
     uMatrix.view = mat4f::rotatey(camera.phi) * uMatrix.view;
-	uMatrix.view = mat4f::rotatex(-camera.theta) * uMatrix.view;   //rotatex(angle in degree)
-    
+//	uMatrix.view = mat4f::rotatex(-camera.theta) * uMatrix.view;   //rotatex(angle in degree)
+    uMatrix.view = mat4f::rotatex(camera.theta) * uMatrix.view;
 }
 
 void Scene::sunmove()

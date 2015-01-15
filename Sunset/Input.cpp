@@ -56,10 +56,20 @@ void Input::mouseMove(GLFWwindow *win, Scene *scene, double x, double y)
 //		scene->sunTheta += dy / 400.0;
         // set limit: sunPhi [0, 2*M_PI], sunTheta [-M_PI/2, M_PI/2]  // * M_PI / 180.0
         // don't allow move across the zenith, allow move below the horizon
-        if (scene->sunTheta + dy/400.0 > 0.01 && scene->sunTheta + dy/400.0 < 1.6) {
-            scene->sunTheta += dy / 400.0;
-        }
-        printf("%f\n", scene->sunTheta);
+//        if (scene->sunTheta + dy/400.0 > 0.01 && scene->sunTheta + dy/400.0 < 1.6) {
+//            scene->sunTheta += dy / 400.0;
+//        }
+//        printf("%f\n", scene->sunTheta);
+        
+        
+        scene->camera.theta += dy/40.0;
+        scene->camera.phi += dx/40.0;
+        
+        if(scene->camera.theta  < -87.f)
+            scene->camera.theta = -87.f;
+        if(scene->camera.theta  > 89.f)
+            scene->camera.theta = 89.f;
+        
     }
     
     // update prior mouse state
@@ -104,20 +114,20 @@ void Input::keyPress(GLFWwindow *win, int key, Scene *scene, Skydome *skydome, O
             
         //lookat direction
         case GLFW_KEY_UP:
-            //scene->camera.theta = fmin(scene->camera.theta + 1.0f, 90.0f - 0.001f);
-            scene->camera.velt = fmin(1.0f, scene->camera.velt + 1.0f);
+//            scene->camera.theta = fmin(scene->camera.theta + 1.0f, 90.0f - 0.001f);
+//            scene->camera.velt = fmin(1.0f, scene->camera.velt + 1.0f);
             break;
         case GLFW_KEY_DOWN:
-            //scene->camera.theta = fmax(scene->camera.theta - 1.0f, -45.0f);
-            scene->camera.velt = fmax(-1.0f, scene->camera.velt - 1.0f);
+//            scene->camera.theta = fmax(scene->camera.theta - 1.0f, -45.0f);
+//            scene->camera.velt = fmax(-1.0f, scene->camera.velt - 1.0f);
             break;
         case GLFW_KEY_LEFT:
             //scene->camera.phi -= 5.0;
-            scene->camera.velp = fmax(-5.0f, scene->camera.velp - 5.0f);
+//            scene->camera.velp = fmax(-5.0f, scene->camera.velp - 5.0f);
             break;
         case GLFW_KEY_RIGHT:
             //scene->camera.phi += 5.0;
-            scene->camera.velp = fmin(5.0f, scene->camera.velp + 5.0f);
+//            scene->camera.velp = fmin(5.0f, scene->camera.velp + 5.0f);
             break;
         //reload the shaders
         case 'R':   //int = 82
@@ -167,20 +177,20 @@ void Input::keyRelease(GLFWwindow *win, int key, Scene *scene)
             
         //lookat direction
         case GLFW_KEY_UP:
-            //scene->camera.theta = fmin(scene->camera.theta + 1.0f, 90.0f - 0.001f);
-            scene->camera.velt = fmax(-1.0f, scene->camera.velt - 1.0f);
+//            scene->camera.theta = fmin(scene->camera.theta + 1.0f, 90.0f - 0.001f);
+//            scene->camera.velt = fmax(-1.0f, scene->camera.velt - 1.0f);
             break;
         case GLFW_KEY_DOWN:
-            //scene->camera.theta = fmax(scene->camera.theta - 1.0f, -45.0f);
-            scene->camera.velt = fmin(1.0f, scene->camera.velt + 1.0f);
+//            scene->camera.theta = fmax(scene->camera.theta - 1.0f, -45.0f);
+//            scene->camera.velt = fmin(1.0f, scene->camera.velt + 1.0f);
             break;
         case GLFW_KEY_LEFT:
             //scene->camera.phi -= 5.0;
-            scene->camera.velp = fmin(5.0f, scene->camera.velp + 5.0f);
+//            scene->camera.velp = fmin(5.0f, scene->camera.velp + 5.0f);
             break;
         case GLFW_KEY_RIGHT:
             //scene->camera.phi += 5.0;
-            scene->camera.velp = fmax(-5.0f, scene->camera.velp - 5.0f);
+//            scene->camera.velp = fmax(-5.0f, scene->camera.velp - 5.0f);
             break;
 
     }
@@ -205,21 +215,23 @@ void Input::keyUpdate(Scene *scene)
         scene->camera.y += scene->camera.vel * delta * scene->camera.vely * fmax(scene->camera.z*0.5f,1.0f);
         scene->camera.z += scene->camera.vel * delta * scene->camera.velz * fmax(scene->camera.z*0.5f,1.0f);
         
-        scene->camera.theta += scene->camera.vel * delta * scene->camera.velt * 5.0;
-        scene->camera.phi += scene->camera.vel * delta * scene->camera.velp * 5.0;
+//        scene->camera.theta += scene->camera.vel * delta * scene->camera.velt * 5.0;
+//        scene->camera.phi += scene->camera.vel * delta * scene->camera.velp * 5.0;
         
-        //        printf("%f\n", scene->camera.theta);
-        if(scene->camera.theta  < -27.f)
-            scene->camera.theta = -27.f;
-        if(scene->camera.theta  > 180.f)
-            scene->camera.theta = 180.f;
+//        printf("delta : %f\n", delta);
+//        if(scene->camera.theta  < -87.f)
+//            scene->camera.theta = -87.f;
+//        if(scene->camera.theta  > 89.f)
+//            scene->camera.theta = 89.f;
+        // keep within -90.0 ~ 90.0 degree, make sure tan(camera.theta) is valid
         
         if(scene->camera.z  < 0.2f)
             scene->camera.z = 0.2f;
         
-        if (scene->sunThetaVel != 0 && scene->sunTheta > 0.0 && scene->sunTheta < 1.65) {
-            scene->sunTheta += scene->sunThetaVel * delta/1000.0;
-            printf("%f\n", scene->sunTheta);
+        if (scene->sunThetaVel <= 1 && scene->sunThetaVel >= -1 && scene->sunTheta > 0.0 && scene->sunTheta < 1.65) {
+            printf("sunTheta %f  sunThetaVel %d  delta %f\n", scene->sunTheta, scene->sunThetaVel, delta);
+            scene->sunTheta += scene->sunThetaVel * delta/10.0;
+
         }
         
         // remember time for next update

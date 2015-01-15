@@ -82,6 +82,7 @@ private:
     struct WinDow {
         int width, height;
     }window;
+    float cameraTheta;
     
     //double updateTime;
     // vertex attribute IDs
@@ -97,7 +98,7 @@ public:
     
     Ocean(GLFWwindow *win);
     ~Ocean();
-    void generateMesh();
+    void generateMesh(float cameraTheta);
     void loadPrograms();
     void generateWavesSpectrum();
     void simulateFFTWaves(float t);
@@ -105,7 +106,7 @@ public:
     void drawQuad(int programindex);
     
     void updateShader();
-    void draw(GLFWwindow *win, unsigned int skytex);
+    void draw(GLFWwindow *win, float camTh, unsigned int skytex);
     
     //debug
 //    void drawToScreen(GLFWwindow *win);

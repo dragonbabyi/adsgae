@@ -46,10 +46,10 @@ float GRID4_SIZE = 11.0; // size in meters (i.e. in spatial domain) of the fourt
 float WIND = 12.0; //12.0 wind speed in meters per second (at 10m above surface)
 float OMEGA = 2.0f; // sea state (inverse wave age)
 bool propagate = true; // wave propagation?
-float A = 1.0; // wave amplitude factor
+float A = 0.2; // wave amplitude factor
 const float cm = 0.23; // Eq 59
 const float km = 370.0; // Eq 59
-float speed = 0.6f;
+float speed = 5.0; //0.6f;
 
 // FFT WAVES
 const int PASSES = 8; // number of passes needed for the FFT 6 -> 64, 7 -> 128, 8 -> 256, etc
@@ -82,6 +82,7 @@ Ocean::Ocean(GLFWwindow *win)
     glGenVertexArrays(VARRAY_COUNT, varrays);
     // get window dimensions
     glfwGetFramebufferSize(win, &window.width, &window.height);
+    cameraTheta = 0.0;
     
     glBindRenderbuffer(GL_RENDERBUFFER, renderbuffers[RENDERBUFFER_DEPTH]);
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, window.width, window.height);
@@ -152,7 +153,7 @@ Ocean::Ocean(GLFWwindow *win)
     glDrawBuffer(GL_BACK);
     
 	// Grid
-	generateMesh();
+	generateMesh(cameraTheta);
     
     // Programs
     loadPrograms();
@@ -183,8 +184,22 @@ void Ocean::updateShader()
     
 }
 
-void Ocean::draw( GLFWwindow *win, unsigned int skytex)
+void Ocean::draw( GLFWwindow *win, float camTh, unsigned int skytex)
 {
+    int width, height;
+    glfwGetFramebufferSize(win, &width, &height);
+    if(window.width != width ||
+       window.height != height ||
+       cameraTheta != camTh)
+    {
+        generateMesh(camTh);
+        printf("re-generate the mesh\n");
+        printf("%f \n", camTh);
+        window.width = width;
+        window.height = height;
+        cameraTheta = camTh;
+    }
+    
     static double now = glfwGetTime();
     static double update = glfwGetTime();
     
@@ -472,7 +487,7 @@ void Ocean::loadPrograms()
 
 float frandom(long *seed);
 
-void Ocean::generateMesh()
+void Ocean::generateMesh(float cameraTheta)
 {
     if (vboSize != 0)
     {
@@ -482,32 +497,32 @@ void Ocean::generateMesh()
     glGenBuffers(1, &buffers[BUFFER_GRID_VERTEX]);
     glBindBuffer(GL_ARRAY_BUFFER, buffers[BUFFER_GRID_VERTEX]);
     
-    //float horizon = tan(camera.theta / 180.0 * M_PI);
-    float horizon = tan(27.0 / 180.0 * M_PI);
-    float s = fmin(1.1f, 0.5f + horizon * 0.5f);
+//    float horizon = tan(cameraTheta / 180.0 * M_PI);
+//    float s = fmin(1.1f, 0.5f + horizon * 0.5f);
+////    float s = fmin(1.1f, 1.0f - horizon * 0.5f);
     
+//    s = (s < 0.001) ? 0.001 : s;
+    float s = 1.1;
     float vmargin = 0.1;
     float hmargin = 0.1;
+//    printf("cameraTheta: %f \n", cameraTheta);
+//    printf("%f \n", horizon);
+//    printf("%f \n", s);
     
     vec4f *data = new vec4f[int(ceil(window.height * (s + vmargin) / gridSize) + 5) * int(ceil(window.width * (1.0 + 2.0 * hmargin) / gridSize) + 5)];
-//    vec4f *data = new vec4f[int(ceil(window.height * 1.2 / gridSize) + 5) * int(ceil(window.width * 1.2 / gridSize) + 5)];
-    
+ 
+    printf("%d \n", int(ceil(window.height * (s + vmargin) / gridSize) + 5) * int(ceil(window.width * (1.0 + 2.0 * hmargin) / gridSize) + 5));
     int n = 0;
     int nx = 0;
     
     for (float j = window.height * s - 0.1/* - gridSize*/; j > -window.height * vmargin - gridSize; j -= gridSize)
-//    for (float j = window.height * s - 0.1; j > 0; j -= gridSize)
     {
         nx = 0;
         for (float i = -window.width * hmargin; i < window.width * (1.0 + hmargin) + gridSize; i += gridSize)
         {
             data[n++] = vec4f(-1.0 + 2.0 * i / window.width, -1.0 + 2.0 * j / window.height, 0.0, 1.0);
             nx++;
-        }
-//        if (n>3) {
-//            break;
-//        }
-        
+        }        
     }
 	vboVertices = n;
     glBufferData(GL_ARRAY_BUFFER, n * sizeof(vec4f), data, GL_STATIC_DRAW);

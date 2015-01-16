@@ -10,9 +10,9 @@
 #include "Scene.h"
 
 
-// using core modern OpenGL
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
+//// using core modern OpenGL
+//#include <GL/glew.h>
+//#include <GLFW/glfw3.h>
 
 #include <math.h>
 
@@ -35,12 +35,12 @@ Scene::Scene(GLFWwindow *win)
     camera.y		= 0.0f;
     camera.theta 	= -2.0f;   //-1.0f;
     camera.phi 		= 2.f;
-    camera.fovy 	= 45.0f;//atan(14/len_mm)  // 22mm lens ~ 32.0f  200mm ~~ 4.0f
+    camera.fovy 	= 5.0f;//atan(14/len_mm)  // 22mm lens ~ 32.0f  200mm ~~ 4.0f
     camera.vel		= 2.0f;
     
     sunTheta = 89.0 * M_PI / 180.0;
     sunPhi = 0.0;
-    sunThetaVel = 0;
+    sunThetaVel = 0.0;
     
     // update view
     viewport(win);
@@ -93,8 +93,9 @@ void Scene::sunmove()
 {
     //update sun position
 //    float sunRadius = 695800.0;
-    float sunDistance = 149600000.0;   //(km)
-    uMatrix.sunpos = vec4f(sin(sunTheta) * cos(sunPhi)*sunDistance , sin(sunTheta) * sin(sunPhi)*sunDistance , cos(sunTheta)*sunDistance , sunTheta);
+//    float sunDistance = 149600000.0;   //(km)
+//    uMatrix.sunpos = vec4f(sin(sunTheta) * cos(sunPhi)*sunDistance , sin(sunTheta) * sin(sunPhi)*sunDistance , cos(sunTheta)*sunDistance , sunTheta);
+    uMatrix.sunpos = vec4f(sin(sunTheta) * cos(sunPhi), sin(sunTheta) * sin(sunPhi), cos(sunTheta), sunTheta);
  
 }
 

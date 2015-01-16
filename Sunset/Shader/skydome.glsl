@@ -107,13 +107,10 @@ void main()
         XYZ[0] = HosekWilkie(XHosekABC, XHosekDEF, XHosekGHI, costheta, gamma, cosGamma) * HosekRadiances.x;
         XYZ[1] = HosekWilkie(YHosekABC, YHosekDEF, YHosekGHI, costheta, gamma, cosGamma) * HosekRadiances.y;
         XYZ[2] = HosekWilkie(ZHosekABC, ZHosekDEF, ZHosekGHI, costheta, gamma, cosGamma) * HosekRadiances.z;
-        
+         
         FragColor = vec4(XYZ, 1.0);  
     }
 
-    // store the luminance in the alpha channel
-    // float luminance = 0.2126 * XYZ[0] + 0.7152 * XYZ[1] + 0.0722 * XYZ[2];
-    // FragColor = vec4(XYZ, log(luminance));
 }
  
 #endif

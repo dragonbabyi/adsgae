@@ -9,6 +9,12 @@
 #ifndef __Sunset__Input__
 #define __Sunset__Input__
 
+
+// using core modern OpenGL
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
+
+
 struct GLFWwindow;
 class Scene;
 class Ocean;
@@ -20,9 +26,7 @@ class Input {
 private:
     int button, oldButton;      // which mouse button was pressed?
     double oldX, oldY;          // location of mouse at last event
-    
     double updateTime;          // time (in seconds) of last update
-    //float panRate, tiltRate;    // for key change, orbiting rate in radians/sec
     
     // public data
 public:
@@ -32,7 +36,9 @@ public:
     // public methods
 public:
     // initialize
-    Input() : button(-1), oldButton(-1), oldX(0), oldY(0), redraw(true), redrawsky(false) {}
+    Input() : button(-1), oldButton(-1), oldX(0), oldY(0), redraw(true), redrawsky(false) {
+        updateTime = glfwGetTime();
+    }
     
     // handle mouse press / release
     void mousePress(GLFWwindow *win, int button, int action);

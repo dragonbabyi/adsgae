@@ -21,9 +21,9 @@
 #include "ArHosekSkyModelData_CIEXYZ.h"
 #include "Htrue.h"
 
-// using core modern OpenGL
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
+//// using core modern OpenGL
+//#include <GL/glew.h>
+//#include <GLFW/glfw3.h>
 
 
 void ArHosekSkyModel_CookConfiguration(double* dataset, float *HosekConfigChannel, float turbidity, float albedo, float theta);
@@ -51,7 +51,7 @@ Skydome::Skydome() {
     glGenTextures(1, &htex);
     glActiveTexture(GL_TEXTURE0 + htex);
 	glBindTexture(GL_TEXTURE_1D, htex);
-    glTexImage1D(GL_TEXTURE_1D, 0, GL_RGBA32F, 256, 0, GL_RED, GL_FLOAT, htrue);
+    glTexImage1D(GL_TEXTURE_1D, 0, GL_R32F, 1024, 0, GL_RED, GL_FLOAT, htrue);
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     

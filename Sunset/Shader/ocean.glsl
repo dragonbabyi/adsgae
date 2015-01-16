@@ -210,14 +210,12 @@ vec3 sunRadiance(float r, float muS) {
     // return transmittanceWithShadow(r, muS) * 2.0;
 }
 
-void sunRadianceAndSkyIrradiance(vec3 worldP, vec3 worldS, out vec3 sunL, out vec3 skyE)
+void sunRadianceAndSkyIrradiance(vec3 worldP, vec3 worldS, out vec3 sunL)
 {
     vec3 worldV = normalize(worldP); // vertical vector
     float r = length(worldP);
     float muS = dot(worldV, worldS);
 	sunL = sunRadiance(r, muS);
-    // skyE = skyIrradiance(r, muS);
-    skyE = vec3(0.0, 0.0, 1.0);
 }
 
 vec3 hdr(vec3 L) {
@@ -378,14 +376,10 @@ vec3 meanSkyRadiance(vec3 V, vec3 N, vec3 Tx, vec3 Ty, vec2 sigmaSq) {
     // vec3 skyc = toneMap5(rgb, avglum); 
     // return skyc;
 
+    result.rgb = result.rgb / result.w;
+
     return result.rgb;
    
-}
-
-// ----------------------------------------------------------------------------
-
-float whitecapCoverage(float epsilon, float mu, float sigma2) {
-	return 0.5*erf((0.5*sqrt(2.0)*(epsilon-mu)*inversesqrt(sigma2))) + 0.5;
 }
 
 
@@ -451,9 +445,7 @@ void main() {
 #endif
 
 	vec3 Lsun;
-	vec3 Esky;
-	vec3 extinction;
-	sunRadianceAndSkyIrradiance(worldCamera + earthPos, worldSunDir, Lsun, Esky);
+	sunRadianceAndSkyIrradiance(worldCamera + earthPos, worldSunDir, Lsun);
 
 	FragColor = vec4(0.0);
 
@@ -463,8 +455,7 @@ void main() {
 // // #endif
 
 // #ifdef SKY_CONTRIB
-	vec3 Lsky = meanSkyRadiance(V, N, Tx, Ty, sigmaSq);
-	// // Rs += fresnel * meanSkyRadiance(V, N, Tx, Ty, sigmaSq);
+	vec3 Lsky = meanSkyRadiance(V, N, Tx, Ty, sigmaSq) / 100.0; 
 	Rs += fresnel * Lsky;
 	FragColor.rgb = Rs;
 // #endif
@@ -474,14 +465,13 @@ void main() {
 // Esky is the total irradiance
 	float omega = 2 * M_PI;
     float sunSr = 6.87e-5;        // http://en.wikipedia.org/wiki/Solid_angle
-	Esky = Lsun * sunSr + Lsky * omega * 2.0;
+	vec3 Esky = Lsun * sunSr + Lsky * omega;
 	vec3 Lsea = seaColor * Esky / M_PI;
 	Ru += (1.0 - fresnel) * Lsea;
 	FragColor.rgb += Ru;
 // #endif
 
-	FragColor.rgb = hdr(FragColor.rgb);
-    // FragColor = vec4(Lsun, 1.0);
+	FragColor.rgb = hdr(FragColor.rgb); 
 
 }
 

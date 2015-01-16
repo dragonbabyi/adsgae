@@ -39,7 +39,7 @@ public:
     
 //    float solarElevation;
     float sunPhi, sunTheta;
-    int sunThetaVel;   // velocity
+    float sunThetaVel;   // velocity
     
     vec4f vboParams;
     

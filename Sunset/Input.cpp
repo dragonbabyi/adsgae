@@ -11,9 +11,9 @@
 #include "Skydome.h"
 #include "ocean.h"
 
-// using core modern OpenGL
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
+//// using core modern OpenGL
+//#include <GL/glew.h>
+//#include <GLFW/glfw3.h>
 
 #include <math.h>
 #include <algorithm>
@@ -106,10 +106,16 @@ void Input::keyPress(GLFWwindow *win, int key, Scene *scene, Skydome *skydome, O
             break;
             
         case 'B':
-            scene->sunThetaVel = 1;
+            scene->sunThetaVel = 1.0;
             break;
         case 'N':
-            scene->sunThetaVel = -1;
+            scene->sunThetaVel = -1.0;
+            break;
+        case 'C':
+            scene->sunThetaVel = 0.01;
+            break;
+        case 'V':
+            scene->sunThetaVel = -0.01;
             break;
             
         //lookat direction
@@ -169,10 +175,16 @@ void Input::keyRelease(GLFWwindow *win, int key, Scene *scene)
             break;
             
         case 'B':
-            scene->sunThetaVel = 0;
+            scene->sunThetaVel = 0.0;
             break;
         case 'N':
-            scene->sunThetaVel = 0;
+            scene->sunThetaVel = 0.0;
+            break;
+        case 'C':
+            scene->sunThetaVel = 0.0;
+            break;
+        case 'V':
+            scene->sunThetaVel = 0.0;
             break;
             
         //lookat direction
@@ -203,9 +215,6 @@ void Input::keyUpdate(Scene *scene)
 {
     if (scene->camera.velx != 0 || scene->camera.vely != 0 || scene->camera.velz != 0 || scene->camera.velt != 0|| scene->camera.velp != 0 || scene->sunThetaVel != 0) {
         double now = glfwGetTime();
-        if ( !updateTime ) {
-            updateTime = glfwGetTime();
-        }
         double delta = (now - updateTime);
         
         // update pan based on time elapsed since last update
@@ -228,7 +237,7 @@ void Input::keyUpdate(Scene *scene)
         if(scene->camera.z  < 0.2f)
             scene->camera.z = 0.2f;
         
-        if (scene->sunThetaVel <= 1 && scene->sunThetaVel >= -1 && scene->sunTheta > 0.0 && scene->sunTheta < 1.65) {
+        if (scene->sunThetaVel != 0 &&scene->sunThetaVel <= 1.1 && scene->sunThetaVel >= -1.1 && scene->sunTheta > 0.0 && scene->sunTheta < 1.65) {
             printf("sunTheta %f  sunThetaVel %d  delta %f\n", scene->sunTheta, scene->sunThetaVel, delta);
             scene->sunTheta += scene->sunThetaVel * delta/10.0;
 

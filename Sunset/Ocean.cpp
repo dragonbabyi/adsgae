@@ -58,7 +58,6 @@ const int FFT_SIZE = 1 << PASSES; // size of the textures storing the waves in f
 // Foam
 float jacobian_scale = 0.2f;
 
-
 ////////////////////////////////////////////////////////////////////////
 float *computeButterflyLookupTexture();
 

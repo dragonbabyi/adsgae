@@ -34,7 +34,7 @@ public:
     int width, height;         // current window dimensions
     
     struct Cam {
-        float velx, vely, velz, x, y, z, velt,velp, theta, phi, fovy, vel;
+        float velx, vely, velz, x, y, z, velt,velp, theta, phi, fovy, velf, vel;
     }camera;
     
 //    float solarElevation;

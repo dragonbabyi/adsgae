@@ -56,7 +56,7 @@ uniform vec2 gridSize;
 #ifdef _VERTEX_
 
 #define LAYER_HEIGHT		0.0
-
+const float M_PI = 3.141592657;
 
 in vec4 position;   //vertex position
  
@@ -77,6 +77,16 @@ vec2 oceanPos(vec4 vertex) {
     return worldCamera.xy + t * worldDir.xy;
 }
 
+float R(float distance) {
+    float htrue = atan(worldCamera.z / distance);
+    float R;                // the refraction from true altitude
+    float t = ((distance - 3000.0)/1000.0);
+    t = (t < 0) ? 0.0 : t;
+    R = 0.4773 - t * t;
+    R = 0.4773;
+    return R;
+}
+
 void main() {
  
     u = oceanPos(position);
@@ -93,18 +103,27 @@ void main() {
     dP.z += textureGrad(fftWavesSampler, vec3(u / GRID_SIZES.w, LAYER_HEIGHT), dux / GRID_SIZES.w, duy / GRID_SIZES.w).w;
 
     // choppy
-    
-    if (choppy > 0.0) {
+    // if (choppy > 0.0) {
+    //     dP.xy += choppy_factor.x*textureGrad(fftWavesSampler, vec3(u / GRID_SIZES.x, 3.0), dux / GRID_SIZES.x, duy / GRID_SIZES.x).xy;
+    //     dP.xy += choppy_factor.y*textureGrad(fftWavesSampler, vec3(u / GRID_SIZES.y, 3.0), dux / GRID_SIZES.y, duy / GRID_SIZES.y).zw;
+    //     dP.xy += choppy_factor.z*textureGrad(fftWavesSampler, vec3(u / GRID_SIZES.z, 4.0), dux / GRID_SIZES.z, duy / GRID_SIZES.z).xy;
+    //     dP.xy += choppy_factor.w*textureGrad(fftWavesSampler, vec3(u / GRID_SIZES.w, 4.0), dux / GRID_SIZES.w, duy / GRID_SIZES.w).zw;
+    // }
+    P = vec3(u + dP.xy, dP.z);   // varying
 
-        dP.xy += choppy_factor.x*textureGrad(fftWavesSampler, vec3(u / GRID_SIZES.x, 3.0), dux / GRID_SIZES.x, duy / GRID_SIZES.x).xy;
-        dP.xy += choppy_factor.y*textureGrad(fftWavesSampler, vec3(u / GRID_SIZES.y, 3.0), dux / GRID_SIZES.y, duy / GRID_SIZES.y).zw;
-        dP.xy += choppy_factor.z*textureGrad(fftWavesSampler, vec3(u / GRID_SIZES.z, 4.0), dux / GRID_SIZES.z, duy / GRID_SIZES.z).xy;
-        dP.xy += choppy_factor.w*textureGrad(fftWavesSampler, vec3(u / GRID_SIZES.w, 4.0), dux / GRID_SIZES.w, duy / GRID_SIZES.w).zw;
-    }
-    P = vec3(u + dP.xy, dP.z);
-
+    float d = (projMatrix * modelView * vec4(P, 1.0)).x;   // will be negative in the opposite direction
+    float angle = -R(d);
+    // rotate -R along axis y
+    float ca = cos(angle * M_PI / 180.0);
+    float sa = sin(angle * M_PI / 180.0);
+    vec4 pos;
+    pos.x = ca * P.x + sa * P.z;
+    pos.y = P.y;
+    pos.z = -sa * P.x + ca * P.z;
+    pos.w = 1.0;           
 	// Final position
-	gl_Position = projMatrix * modelView * vec4(P, 1.0);
+    gl_Position = projMatrix * modelView * pos;
+    // gl_Position = projMatrix * modelView * vec4(P, 1.0);
 	//gl_Position = projMatrix * modelView * vec4(u, dP.z, 1.0);
 
 }
@@ -177,6 +196,7 @@ mat4 modelView = transpose(view);
 mat4 cameraToWorld = inverse(modelView);
 vec3 worldCamera = vec3(cameraToWorld[3][0], cameraToWorld[3][1], cameraToWorld[3][2]); 
 // vec3 worldSunDir = vec3(sunpos.x, sunpos.y, sunpos.z);
+
 vec3 worldSunDir = normalize(vec3(sunpos.x, sunpos.y, sunpos.z));
 
 ////////
@@ -363,18 +383,6 @@ vec3 meanSkyRadiance(vec3 V, vec3 N, vec3 Tx, vec3 Ty, vec2 sigmaSq) {
     vec2 duy = 2.0 * (U(vec2(0.0, eps), V, N, Tx, Ty) - u0) / eps * sqrt(sigmaSq.y);
 
     result = textureGrad(skySampler, u0 * (0.5 / 1.1) + 0.5, dux * (0.5 / 1.1), duy * (0.5 / 1.1));
-    
-    // // tone mapping the result
-    // vec3 rgb = XYZ2RGB(result.rgb);
-    // // vec3 skyc = mix(pow(0.38317*rgb,vec3(1.0/2.2)), 1.-exp(-rgb), step(1.413,rgb));
-    // vec3 avg = textureLod (skySampler, vec2(0.5, 0.5), 10.0).xyz;
-    // float hdrExposure = 5.0 - 2.75 * cos(sunpos.w);
-    // vec3 Lrgb = XYZ2RGB(avg);
-    // float avglum = 0.2126 * Lrgb.x + 0.7152 * Lrgb.y + 0.0722 * Lrgb.z;
-    // avglum *= hdrExposure;
-
-    // vec3 skyc = toneMap5(rgb, avglum); 
-    // return skyc;
 
     result.rgb = result.rgb / result.w;
 

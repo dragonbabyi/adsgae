@@ -134,7 +134,7 @@ vec3 hdr(vec3 L) {
 
 const float SUN_INTENSITY = 100.0;
 const float SCALE = 1000.0;
-const float Rg = 6360.0; // (km)
+const float Rg = 6360.0 * SCALE; // (m)  //6,371
  // Rayleigh
 const float HR = 8.0 * SCALE;
 const vec3 betaR = vec3(5.8e-3, 1.35e-2, 3.31e-2) / SCALE;
@@ -175,6 +175,14 @@ float opticalDepth(float H, float r, float mu, float d) {
 // uses analytic formula instead of transmittance texture
 vec3 analyticTransmittance(float r, float mu, float d) {
     return exp(- betaR * opticalDepth(HR, r, mu, d) - betaMEx * opticalDepth(HM, r, mu, d));
+}
+
+vec3 transmittanceWithShadow(float r, float mu) {
+    return mu < -sqrt(1.0 - (Rg / r) * (Rg / r)) ? vec3(0.0) : analyticTransmittance(r, mu, Rg);
+}
+
+vec3 sunRadiance(float r, float muS) {
+    return transmittanceWithShadow(r, muS) * SUN_INTENSITY;
 }
 
 void main()
@@ -247,7 +255,7 @@ void main()
     const float sunSolidAngle = 0.0000687; 
     float halfangle = acos(1.0 - (sunSolidAngle / MATH_PI / 2.0));    // {\Omega} = 2PI(1-cos{\theta})
 
-    float suncenterTheta = sun.w + halfangle;   // sun app
+    float suncenterTheta = sun.w + halfangle;   // sun center apparent theta
  
     float Sun_ha = (MATH_PI/2.0 - suncenterTheta) * 180.0 / MATH_PI;     // apparent altitude in degree
     float Sun_R = prefix/tan((Sun_ha + 7.31/(Sun_ha + 4.4)) * MATH_PI / 180.0); //in arcminutes
@@ -272,16 +280,20 @@ void main()
     {
         // compute the sun radiance --> color
         vec3 worldV = vec3(0.0, 0.0, 1.0); // vertical vector
-        vec3 worldSunDir = normalize(vec3(sin(Sun_theta)*distance, 0.0, cos(Sun_theta)*distance - viewpoint.z));
+        // vec3 worldSunDir = normalize(vec3(sin(Sun_theta)*distance, 0.0, cos(Sun_theta)*distance - viewpoint.z));
+        vec3 worldSunDir = normalize(vec3(sin(Sun_theta)*distance, 0.0, cos(Sun_theta)*distance));
         // vec3 worldSunDir = realSun;
-        float r = 6360.005;  //(km)  // length(worldCamera + earthPos) (m)
+        float r = 6360005;  //(m)  // length(worldCamera + earthPos) (m)
         float muS = dot(worldV, worldSunDir); 
-        vec3 sunColor = analyticTransmittance(r, muS, Rg)*100.0; // * SUN_INTENSITY;   // radiance
-        // sunColor = toneMap5(sunColor, avglum);
-        // sunColor = hdr(sunColor);
-        sunColor = vec3(1.0, 0.0, 0.0);
-
-          // // limb darkening 
+        vec3 sunColor = sunRadiance(r, muS);   // radiance
+        // vec3 sunColor = vec3(0.0,0.0,0.0);   // radiance
+        sunColor = toneMap5(sunColor, avglum);
+        // keep the sun color when the radiance goes to 0
+        if (sunColor.x < 0.2 || sunColor.y < 0.01 || sunColor.z < 0.01 )
+        {
+            sunColor = vec3(1.0, 0.0, 0.0);
+        }
+        // // limb darkening 
         float u = 0.6;  
         float d = acos(dot(viewdir, worldSunDir)) / halfangle;   // distance from the center of the sun 
         // avoid middle black
@@ -290,12 +302,9 @@ void main()
             float limbdarkening = 1.0 - u *(1.0 - sqrt(1.0 - d*d));  // /(sun_radius*sun_radius)
             sunColor *= limbdarkening;
         }
-        // float limbdarkening = 1.0 - u *(1.0 - sqrt(1.0 - d*d));  // /(sun_radius*sun_radius)
-        // sunColor *= limbdarkening;
-        
+         
         FragColor = vec4(sunColor, 1.0);  
-        // FragColor = vec4(1.0, 1.0, 1.0, 1.0);
-
+     
     }
 }
 

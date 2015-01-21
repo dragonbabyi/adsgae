@@ -164,7 +164,7 @@ void Input::keyUpdate(Scene *scene)
         scene->camera.fovy += scene->camera.velf * delta;
 
         if (scene->sunThetaVel != 0 &&scene->sunThetaVel <= 1.1 && scene->sunThetaVel >= -1.1 && scene->sunTheta > 0.0 && scene->sunTheta < 1.65) {
-            printf("sunTheta %f  sunThetaVel %f  delta %f\n", scene->sunTheta, scene->sunThetaVel, delta);
+//            printf("sunTheta %f  sunThetaVel %f  delta %f\n", scene->sunTheta, scene->sunThetaVel, delta);
             scene->sunTheta += scene->sunThetaVel * delta/10.0;
         }
         

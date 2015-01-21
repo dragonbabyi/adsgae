@@ -115,7 +115,7 @@ GLFWwindow *initGLFW(AppContext *appctx)
     glewExperimental = true;
     glewInit();
 
-    printf("1# %d​\n", glGetError());
+    //    printf("1# %d​\n", glGetError());
 
 	// store context pointer to access application data
     glfwSetWindowUserPointer(win, appctx);
@@ -149,23 +149,14 @@ int main(int argc, char *argv[])
     // get time
     std::ofstream myfile;
     myfile.open ("timeTable.txt");
-    myfile << " time table \n";
+    myfile << "Frame    SKY    OCEAN \n";
     
     double lastTime = glfwGetTime();
     int nbFrames = 0;
+    double skyTime = 0.0, oceanTime = 0.0;
 
     //all program should be initialized
     while (!glfwWindowShouldClose(win)) {
-        
-        // Measure speed
-        double currentTime = glfwGetTime();
-        nbFrames++;
-        if ( currentTime - lastTime >= 1.0 ){ // If last prinf() was more than 1 sec ago
-            // printf and reset timer
-            myfile << 1000.0/double(nbFrames) << " ms/frame \n";
-            nbFrames = 0;
-            lastTime += 1.0;
-        }
         
         // check for continuous key updates to view
         appctx.input->keyUpdate(appctx.scene);
@@ -178,8 +169,27 @@ int main(int argc, char *argv[])
         
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         
+        // Measure speed
+        double currentTime = glfwGetTime();
+        nbFrames++;
+        if ( currentTime - lastTime >= 1.0 ){ // If last was more than 1 sec ago
+            // save and reset timer
+            myfile << 1000.0/double(nbFrames) <<"  "<< 1000.0*skyTime/double(nbFrames) <<"  "<< 1000.0*oceanTime/double(nbFrames) <<"  "<< " ms/frame \n";
+            
+            skyTime = 0.0;
+            oceanTime = 0.0;
+            
+            nbFrames = 0;
+            lastTime += 1.0;
+        }
+        
         appctx.sky->draw(win, appctx.scene->sunTheta);
+        double currentTime1 = glfwGetTime();
+        skyTime += currentTime1 - currentTime;
+        
         appctx.ocean->draw(win, appctx.scene->camera.theta, appctx.sky->skytexture);
+        double currentTime2 = glfwGetTime();
+        oceanTime += currentTime2 - currentTime1;
         
         // show what we drew
         glfwSwapBuffers(win);

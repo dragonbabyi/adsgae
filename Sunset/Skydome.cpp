@@ -227,10 +227,10 @@ void Skydome::draw( GLFWwindow *win, float theta) {
     glDrawBuffers(1, DrawBuffers);
     
     //check
-    if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-    {
-        printf("%d\n", glCheckFramebufferStatus(GL_FRAMEBUFFER));
-    }
+//    if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+//    {
+//        printf("%d\n", glCheckFramebufferStatus(GL_FRAMEBUFFER));
+//    }
     
     glViewport(0, 0, skyTexSize, skyTexSize);
     

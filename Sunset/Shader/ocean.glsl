@@ -103,7 +103,7 @@ void main() {
 
     // float d = (projMatrix * modelView * vec4(P, 1.0)).x;   // will be negative in the opposite direction
     // float angle = -R(d);  //R = 0.4773;  //0.4776959488
-    float angle = -0.4776;
+    float angle = -0.4773;
     // rotate -R along axis y
     float ca = cos(angle * M_PI / 180.0);
     float sa = sin(angle * M_PI / 180.0);

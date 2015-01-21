@@ -192,8 +192,8 @@ void Ocean::draw( GLFWwindow *win, float camTh, unsigned int skytex)
        cameraTheta != camTh)
     {
         generateMesh(camTh);
-        printf("re-generate the mesh\n");
-        printf("%f \n", camTh);
+//        printf("re-generate the mesh\n");
+//        printf("%f \n", camTh);
         window.width = width;
         window.height = height;
         cameraTheta = camTh;
@@ -503,7 +503,6 @@ void Ocean::generateMesh(float cameraTheta)
  
     vec4f *data = new vec4f[int(ceil(window.height * (s + vmargin) / gridSize) + 5) * int(ceil(window.width * (1.0 + 2.0 * hmargin) / gridSize) + 5)];
  
-    printf("%d \n", int(ceil(window.height * (s + vmargin) / gridSize) + 5) * int(ceil(window.width * (1.0 + 2.0 * hmargin) / gridSize) + 5));
     int n = 0;
     int nx = 0;
     

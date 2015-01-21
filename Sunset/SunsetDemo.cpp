@@ -52,9 +52,8 @@ extern "C" {
     void reshape(GLFWwindow *win, int width, int height)
     {
         AppContext *appctx = (AppContext*)glfwGetWindowUserPointer(win);
-        
+
         appctx->scene->viewport(win);
-        appctx->input->redraw = true;
     }
     
     //

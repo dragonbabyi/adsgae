@@ -51,17 +51,7 @@ void Input::mouseMove(GLFWwindow *win, Scene *scene, double x, double y)
         // record differences & update last position
         float dx = float(x - oldX);
         float dy = float(y - oldY);
-        
-//      scene->sunPhi += dx / 400.0;
-//		scene->sunTheta += dy / 400.0;
-        // set limit: sunPhi [0, 2*M_PI], sunTheta [-M_PI/2, M_PI/2]  // * M_PI / 180.0
-        // don't allow move across the zenith, allow move below the horizon
-//        if (scene->sunTheta + dy/400.0 > 0.01 && scene->sunTheta + dy/400.0 < 1.6) {
-//            scene->sunTheta += dy / 400.0;
-//        }
-//        printf("%f\n", scene->sunTheta);
-        
-        
+          
         scene->camera.theta += dy/40.0;
         scene->camera.phi += dx/40.0;
         
@@ -84,27 +74,6 @@ void Input::mouseMove(GLFWwindow *win, Scene *scene, double x, double y)
 void Input::keyPress(GLFWwindow *win, int key, Scene *scene, Skydome *skydome, Ocean *ocean)
 {
     switch (key) {
-
-        //camera position
-//        case 'Z':
-//            scene->camera.vely = fmax(-1.0f, scene->camera.vely - 1.0f);
-//            break;
-//        case 'S':
-//            scene->camera.vely = fmin(1.0f, scene->camera.vely + 1.0f);
-//            break;
-//        case 'X':
-//            scene->camera.velx = fmax(-1.0f, scene->camera.velx - 1.0f);
-//            break;
-//        case 'D':
-//            scene->camera.velx = fmin(1.0f, scene->camera.velx + 1.0f);
-//            break;
-//        case 'A':
-//            scene->camera.velz = fmax(-1.0f, scene->camera.velz - 1.0f);
-//            break;
-//        case 'W':
-//            scene->camera.velz = fmin(1.0f, scene->camera.velz + 1.0f);
-//            break;
-            
         case 'B':
             scene->sunThetaVel = 1.0;
             break;
@@ -137,24 +106,7 @@ void Input::keyPress(GLFWwindow *win, int key, Scene *scene, Skydome *skydome, O
         case 'P':
             scene->camera.phi = -182.0;   // opposite side
             break;
-            
-        //lookat direction
-//        case GLFW_KEY_UP:
-////            scene->camera.theta = fmin(scene->camera.theta + 1.0f, 90.0f - 0.001f);
-////            scene->camera.velt = fmin(1.0f, scene->camera.velt + 1.0f);
-//            break;
-//        case GLFW_KEY_DOWN:
-////            scene->camera.theta = fmax(scene->camera.theta - 1.0f, -45.0f);
-////            scene->camera.velt = fmax(-1.0f, scene->camera.velt - 1.0f);
-//            break;
-//        case GLFW_KEY_LEFT:
-//            //scene->camera.phi -= 5.0;
-////            scene->camera.velp = fmax(-5.0f, scene->camera.velp - 5.0f);
-//            break;
-//        case GLFW_KEY_RIGHT:
-//            //scene->camera.phi += 5.0;
-////            scene->camera.velp = fmin(5.0f, scene->camera.velp + 5.0f);
-//            break;
+     
         //reload the shaders
         case 'R':   //int = 82
             skydome->updateShader();
@@ -175,25 +127,6 @@ void Input::keyPress(GLFWwindow *win, int key, Scene *scene, Skydome *skydome, O
 void Input::keyRelease(GLFWwindow *win, int key, Scene *scene)
 {
     switch (key) {
-//        case 'Z':
-//            scene->camera.vely = fmin(1.0f, scene->camera.vely + 1.0f);
-//            break;
-//        case 'S':
-//            scene->camera.vely = fmax(-1.0f, scene->camera.vely - 1.0f);
-//            break;
-//        case 'X':
-//            scene->camera.velx = fmin(1.0f, scene->camera.velx + 1.0f);
-//            break;
-//        case 'D':
-//            scene->camera.velx = fmax(-1.0f, scene->camera.velx - 1.0f);
-//            break;
-//        case 'A':
-//            scene->camera.velz = fmin(1.0f, scene->camera.velz + 1.0f);
-//            break;
-//        case 'W':
-//            scene->camera.velz = fmax(-1.0f, scene->camera.velz - 1.0f);
-//            break;
-            
         case 'B':
             scene->sunThetaVel = 0.0;
             break;
@@ -215,24 +148,6 @@ void Input::keyRelease(GLFWwindow *win, int key, Scene *scene)
             scene->camera.velf = 0.0;
             break;
             
-        //lookat direction
-        case GLFW_KEY_UP:
-//            scene->camera.theta = fmin(scene->camera.theta + 1.0f, 90.0f - 0.001f);
-//            scene->camera.velt = fmax(-1.0f, scene->camera.velt - 1.0f);
-            break;
-        case GLFW_KEY_DOWN:
-//            scene->camera.theta = fmax(scene->camera.theta - 1.0f, -45.0f);
-//            scene->camera.velt = fmin(1.0f, scene->camera.velt + 1.0f);
-            break;
-        case GLFW_KEY_LEFT:
-            //scene->camera.phi -= 5.0;
-//            scene->camera.velp = fmin(5.0f, scene->camera.velp + 5.0f);
-            break;
-        case GLFW_KEY_RIGHT:
-            //scene->camera.phi += 5.0;
-//            scene->camera.velp = fmax(-5.0f, scene->camera.velp - 5.0f);
-            break;
-
     }
 }
 
@@ -241,28 +156,16 @@ void Input::keyRelease(GLFWwindow *win, int key, Scene *scene)
 //
 void Input::keyUpdate(Scene *scene)
 {
-//    if (scene->camera.velx != 0 || scene->camera.vely != 0 || scene->camera.velz != 0 || scene->camera.velt != 0|| scene->camera.velp != 0 || scene->sunThetaVel != 0) {
     if (scene->camera.velf != 0 || scene->sunThetaVel != 0) {
 
         double now = glfwGetTime();
         double delta = (now - updateTime);
         
-        // update pan based on time elapsed since last update
-        // ensures uniform rate of change
-        
-//        scene->camera.x += scene->camera.vel * delta * scene->camera.velx * fmax(scene->camera.z*0.5f,1.0f);
-//        scene->camera.y += scene->camera.vel * delta * scene->camera.vely * fmax(scene->camera.z*0.5f,1.0f);
-//        scene->camera.z += scene->camera.vel * delta * scene->camera.velz * fmax(scene->camera.z*0.5f,1.0f);
-        
         scene->camera.fovy += scene->camera.velf * delta;
-        
-//        if(scene->camera.z  < 0.2f)
-//            scene->camera.z = 0.2f;
-        
+
         if (scene->sunThetaVel != 0 &&scene->sunThetaVel <= 1.1 && scene->sunThetaVel >= -1.1 && scene->sunTheta > 0.0 && scene->sunTheta < 1.65) {
             printf("sunTheta %f  sunThetaVel %f  delta %f\n", scene->sunTheta, scene->sunThetaVel, delta);
             scene->sunTheta += scene->sunThetaVel * delta/10.0;
-
         }
         
         // remember time for next update

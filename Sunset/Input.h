@@ -24,19 +24,14 @@ class Sun;
 class Input {
     // private data
 private:
-    int button, oldButton;      // which mouse button was pressed?
-    double oldX, oldY;          // location of mouse at last event
-    double updateTime;          // time (in seconds) of last update
-    
-    // public data
-public:
-    bool redraw;                // true if we need to redraw
-    bool redrawsky;         //only when sun changes
+    int button, oldButton;
+    double oldX, oldY;
+    double updateTime;
     
     // public methods
 public:
     // initialize
-    Input() : button(-1), oldButton(-1), oldX(0), oldY(0), redraw(true), redrawsky(false) {
+    Input() : button(-1), oldButton(-1), oldX(0), oldY(0) {
         updateTime = glfwGetTime();
     }
     

@@ -10,11 +10,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Sunset/Skydome.cpp"
-            timestampString = "442943697.202399"
+            timestampString = "443509751.308197"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "169"
-            endingLineNumber = "169"
+            startingLineNumber = "163"
+            endingLineNumber = "163"
             landmarkName = "Skydome::updateShader()"
             landmarkType = "5">
          </BreakpointContent>
@@ -26,11 +26,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Sunset/Ocean.cpp"
-            timestampString = "443426397.917428"
+            timestampString = "443509751.308197"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "511"
-            endingLineNumber = "511"
+            startingLineNumber = "504"
+            endingLineNumber = "504"
             landmarkName = "Ocean::generateMesh(float cameraTheta)"
             landmarkType = "5">
          </BreakpointContent>

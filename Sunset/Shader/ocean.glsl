@@ -77,16 +77,6 @@ vec2 oceanPos(vec4 vertex) {
     return worldCamera.xy + t * worldDir.xy;
 }
 
-float R(float distance) {
-    float htrue = atan(worldCamera.z / distance);
-    float R;                // the refraction from true altitude
-    float t = ((distance - 3000.0)/1000.0);
-    t = (t < 0) ? 0.0 : t;
-    R = 0.4773 - t * t;
-    R = 0.4773;
-    return R;
-}
-
 void main() {
  
     u = oceanPos(position);
@@ -103,16 +93,17 @@ void main() {
     dP.z += textureGrad(fftWavesSampler, vec3(u / GRID_SIZES.w, LAYER_HEIGHT), dux / GRID_SIZES.w, duy / GRID_SIZES.w).w;
 
     // choppy
-    // if (choppy > 0.0) {
-    //     dP.xy += choppy_factor.x*textureGrad(fftWavesSampler, vec3(u / GRID_SIZES.x, 3.0), dux / GRID_SIZES.x, duy / GRID_SIZES.x).xy;
-    //     dP.xy += choppy_factor.y*textureGrad(fftWavesSampler, vec3(u / GRID_SIZES.y, 3.0), dux / GRID_SIZES.y, duy / GRID_SIZES.y).zw;
-    //     dP.xy += choppy_factor.z*textureGrad(fftWavesSampler, vec3(u / GRID_SIZES.z, 4.0), dux / GRID_SIZES.z, duy / GRID_SIZES.z).xy;
-    //     dP.xy += choppy_factor.w*textureGrad(fftWavesSampler, vec3(u / GRID_SIZES.w, 4.0), dux / GRID_SIZES.w, duy / GRID_SIZES.w).zw;
-    // }
+    if (choppy > 0.0) {
+        dP.xy += choppy_factor.x*textureGrad(fftWavesSampler, vec3(u / GRID_SIZES.x, 3.0), dux / GRID_SIZES.x, duy / GRID_SIZES.x).xy;
+        dP.xy += choppy_factor.y*textureGrad(fftWavesSampler, vec3(u / GRID_SIZES.y, 3.0), dux / GRID_SIZES.y, duy / GRID_SIZES.y).zw;
+        dP.xy += choppy_factor.z*textureGrad(fftWavesSampler, vec3(u / GRID_SIZES.z, 4.0), dux / GRID_SIZES.z, duy / GRID_SIZES.z).xy;
+        dP.xy += choppy_factor.w*textureGrad(fftWavesSampler, vec3(u / GRID_SIZES.w, 4.0), dux / GRID_SIZES.w, duy / GRID_SIZES.w).zw;
+    }
     P = vec3(u + dP.xy, dP.z);   // varying
 
-    float d = (projMatrix * modelView * vec4(P, 1.0)).x;   // will be negative in the opposite direction
-    float angle = -R(d);
+    // float d = (projMatrix * modelView * vec4(P, 1.0)).x;   // will be negative in the opposite direction
+    // float angle = -R(d);  //R = 0.4773;  //0.4776959488
+    float angle = -0.4776;
     // rotate -R along axis y
     float ca = cos(angle * M_PI / 180.0);
     float sa = sin(angle * M_PI / 180.0);

@@ -106,12 +106,6 @@ Program::Program(int files, char** fileNames, char *options) {
         glShaderSource(geometryShader, files + 2, contents, NULL);
         glCompileShader(geometryShader);
         printShaderLog(geometryShader);
-        
-//        printf("10# %d​\n", glGetError());
-//        glProgramParameteri(program, GL_GEOMETRY_INPUT_TYPE, GL_TRIANGLES);
-//        glProgramParameteri(program, GL_GEOMETRY_OUTPUT_TYPE, GL_TRIANGLE_STRIP);
-//        glProgramParameteri(program, GL_GEOMETRY_VERTICES_OUT, 3 * 5);
-//        printf("1111# %d​\n", glGetError());
     }
 
     contents[0] = "#version 400 core\n";
@@ -132,14 +126,6 @@ Program::Program(int files, char** fileNames, char *options) {
         glGetProgramInfoLog(program, logLength, &logLength, log);
         printf("%s", log);
     }
-
-//    if (checkProgram(program)) {
-//        assert(glGetError() == 0);
-//    } else {
-//        printShaderLog(vertexShader);
-//        printShaderLog(fragmentShader);
-//        exit(-1);
-//    }
 
     if (vertexShader != -1) {
         glDeleteShader(vertexShader);

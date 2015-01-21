@@ -187,8 +187,6 @@ vec3 sunRadiance(float r, float muS) {
 
 void main()
 {
-    // float sinSkyTheta = sqrt(p.x*p.x + p.y*p.y)/sqrt(p.x*p.x + p.y*p.y + p.z*p.z);
-    // float SkyTheta = asin(sinSkyTheta);    // sky theta  
     float tanSkyTheta = sqrt(p.x*p.x + p.y*p.y)/p.z;
     float SkyTheta = atan(tanSkyTheta);
     float nr = abs(SkyTheta) / MATH_PI ;   // map th(radians) 0 ~ PI/2, scale 1/2
@@ -209,7 +207,6 @@ void main()
     avglum *= hdrExposure;
 
     vec3 skyc = toneMap5(rgb, avglum); 
-
     FragColor = vec4(skyc, 1.0);
 
 	//************** add sun  *****************
@@ -228,10 +225,6 @@ void main()
     
     float R, h, Htexcoord;
     // R = prefix/tan((ha + 7.31/(ha + 4.4)) * MATH_PI / 180.0);   //in arcminutes
-    // h = ha - R/60.0;   // true altitude in degree
-
-    //////////////////////
-    R = prefix/tan((ha + 7.31/(ha + 4.4)) * MATH_PI / 180.0);   //in arcminutes
     // h = ha - R/60.0;   // true altitude in degree
 
     ///////////////////
@@ -269,7 +262,10 @@ void main()
 
     // vec3 realSun = vec3(sun.x, sun.y, sun.z) * distance;
     vec3 dc = viewpoint - realSun;
-
+    // if the sun is in the opposite direction  ( < PI/2 )
+    if(dot(viewdir, normalize(dc)) > -0.8) { // > 0.0 ) {
+        return;
+    }
     // solve p=r.start-center + t*r.direction; p*p -radius^2=0  
     float a = dot(viewdir, viewdir);
     float b = 2*dot(viewdir, dc);
@@ -282,12 +278,12 @@ void main()
         vec3 worldV = vec3(0.0, 0.0, 1.0); // vertical vector
         // vec3 worldSunDir = normalize(vec3(sin(Sun_theta)*distance, 0.0, cos(Sun_theta)*distance - viewpoint.z));
         vec3 worldSunDir = normalize(vec3(sin(Sun_theta)*distance, 0.0, cos(Sun_theta)*distance));
-        // vec3 worldSunDir = realSun;
+      
         float r = 6360005;  //(m)  // length(worldCamera + earthPos) (m)
         float muS = dot(worldV, worldSunDir); 
         vec3 sunColor = sunRadiance(r, muS);   // radiance
-        // vec3 sunColor = vec3(0.0,0.0,0.0);   // radiance
         sunColor = toneMap5(sunColor, avglum);
+
         // keep the sun color when the radiance goes to 0
         if (sunColor.x < 0.2 || sunColor.y < 0.01 || sunColor.z < 0.01 )
         {

@@ -20,7 +20,7 @@ unsigned int skyTexSize = 1024;
 ////////////////////////
 float gridSize = 4.0f;
 float hdrExposure = 1.05;
-bool grid = false; //false
+bool grid = false;
 bool animate = true;
 bool seaContrib = true;
 bool sunContrib = true;
@@ -31,7 +31,7 @@ bool show_spectrum = false;
 float show_spectrum_zoom = 1.0;
 bool show_spectrum_linear = false;
 bool normals = false;
-bool choppy = false; //true
+bool choppy = true; //true
 float choppy_factor0 = 2.3f;	// Control Choppiness
 float choppy_factor1 = 2.1f;	// Control Choppiness
 float choppy_factor2 = 1.3f;	// Control Choppiness
@@ -233,7 +233,7 @@ void Ocean::draw( GLFWwindow *win, float camTh, unsigned int skytex)
     glBindTexture(GL_TEXTURE_2D, skytex);
     glUniform1i(glGetUniformLocation(programs[PROGRAM_RENDER]->program, "skySampler"), skytex);
     
-    glActiveTexture(GL_TEXTURE0 + TEXTURE_SLOPE_VARIANCE);   ///// ??
+    glActiveTexture(GL_TEXTURE0 + TEXTURE_SLOPE_VARIANCE);   /////
     glBindTexture(GL_TEXTURE_2D, TEXTURE_SLOPE_VARIANCE);
     glUniform1i(glGetUniformLocation(programs[PROGRAM_RENDER]->program, "slopeVarianceSampler"), TEXTURE_SLOPE_VARIANCE);
     
@@ -458,7 +458,6 @@ void Ocean::loadPrograms()
 	}
 	programs[PROGRAM_FFTX] = new Program(1, files);
     glUseProgram(programs[PROGRAM_FFTX]->program);
-//	glUniform1i(glGetUniformLocation(programs[PROGRAM_FFTX]->program, "butterflySampler"), TEXTURE_BUTTERFLY);
     glUniform1i(glGetUniformLocation(programs[PROGRAM_FFTX]->program, "nLayers"), choppy ? 8 : 3);
 	glUniform1i(glGetUniformLocation(programs[PROGRAM_FFTX]->program, "sLayer"), 0);
 
@@ -471,11 +470,9 @@ void Ocean::loadPrograms()
 	}
 	programs[PROGRAM_FFTY] = new Program(1, files);
     glUseProgram(programs[PROGRAM_FFTY]->program);
-//	glUniform1i(glGetUniformLocation(programs[PROGRAM_FFTY]->program, "butterflySampler"), TEXTURE_BUTTERFLY);
     glUniform1i(glGetUniformLocation(programs[PROGRAM_FFTX]->program, "nLayers"), choppy ? 8 : 3);
 	glUniform1i(glGetUniformLocation(programs[PROGRAM_FFTX]->program, "sLayer"), 0);
 
-    
 	// Back to default pipeline
 	glUseProgram(0);
 }
@@ -499,15 +496,11 @@ void Ocean::generateMesh(float cameraTheta)
 //    float horizon = tan(cameraTheta / 180.0 * M_PI);
 //    float s = fmin(1.1f, 0.5f + horizon * 0.5f);
 ////    float s = fmin(1.1f, 1.0f - horizon * 0.5f);
-    
-//    s = (s < 0.001) ? 0.001 : s;
+ 
     float s = 1.1;
     float vmargin = 0.1;
     float hmargin = 0.1;
-//    printf("cameraTheta: %f \n", cameraTheta);
-//    printf("%f \n", horizon);
-//    printf("%f \n", s);
-    
+ 
     vec4f *data = new vec4f[int(ceil(window.height * (s + vmargin) / gridSize) + 5) * int(ceil(window.width * (1.0 + 2.0 * hmargin) / gridSize) + 5)];
  
     printf("%d \n", int(ceil(window.height * (s + vmargin) / gridSize) + 5) * int(ceil(window.width * (1.0 + 2.0 * hmargin) / gridSize) + 5));

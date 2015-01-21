@@ -21,10 +21,6 @@
 #include "ArHosekSkyModelData_CIEXYZ.h"
 #include "Htrue.h"
 
-//// using core modern OpenGL
-//#include <GL/glew.h>
-//#include <GLFW/glfw3.h>
-
 
 void ArHosekSkyModel_CookConfiguration(double* dataset, float *HosekConfigChannel, float turbidity, float albedo, float theta);
 void ArHosekSkyModel_CookRadianceConfiguration(double* dataset, float &HosekRadiancesChannel, float turbidity, float albedo, float theta);
@@ -88,7 +84,7 @@ Skydome::Skydome() {
     std::vector<GLfloat> vert;
     std::vector<GLint> indices;
     
-    float radius = 1.0;    // have to be the same for the sun shader part
+    float radius = 1.0;
     int iFactor = 180;
     int h = 90;
     vert.resize(iFactor*h*3);
@@ -108,8 +104,7 @@ Skydome::Skydome() {
             
         }
     }
-    
-    // build index array linking sets of three vertices into triangles
+   
     std::vector<GLint>::iterator k = indices.begin();
     for (int i = 0; i<h; i++) {
         for (int j = 0; j<iFactor; j++) {
@@ -136,7 +131,6 @@ Skydome::Skydome() {
 
 
 Skydome::~Skydome() {
-//    glDeleteProgram(skydomeShader);
     glDeleteBuffers(NUM_BUFFERS, bufferIDs);
     glDeleteTextures(1, &skytexture);
     glDeleteTextures(1, &htex);
@@ -258,40 +252,7 @@ void Skydome::draw( GLFWwindow *win, float theta) {
     // final render
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glDrawBuffer(GL_BACK);
-    
-//    glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
-//    glEnable(GL_DEPTH_TEST);
-//    glEnable(GL_CULL_FACE);
-//    glCullFace(GL_BACK);
-    
-// test tone mapping    /////debugging
-/*    glViewport(0, 0, skyTexSize, skyTexSize);
-    
-    glUseProgram(skydomeShader[1]->program);
-    
-    glBindVertexArray(varrayIDs[QUAD_VERTEX]);
-    positionAttrib = glGetAttribLocation(skydomeShader[1]->program, "position");
-    glEnableVertexAttribArray(positionAttrib);
-    glBindBuffer(GL_ARRAY_BUFFER, bufferIDs[QUAD_VERTEX_BUFFER]);
-    glVertexAttribPointer(positionAttrib, 4, GL_FLOAT, GL_FALSE, 0, 0);   // 4!!
-    
-    glUniformBlockBinding(skydomeShader[1]->program,
-                          glGetUniformBlockIndex(skydomeShader[1]->program,"Matrices"),
-                          AppContext::MATRIX_UNIFORMS);
-
-    //skytexture
-    glActiveTexture(GL_TEXTURE0 + skytexture);
-    glGenerateMipmap(GL_TEXTURE_2D);
-    
-    glBindTexture(GL_TEXTURE_2D, skytexture);
-    glUniform1i(glGetUniformLocation(skydomeShader[1]->program, "skySample2D"), skytexture);
-    
-    glBindVertexArray(varrayIDs[QUAD_VERTEX]);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferIDs[QUAD_INDEX_BUFFER]);
-    glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-*/
-    
-//    // get window dimensions
+ 
     int width, height;
     glfwGetFramebufferSize(win, &width, &height);
     glViewport(0, 0, width, height);
@@ -305,7 +266,6 @@ void Skydome::draw( GLFWwindow *win, float theta) {
     
     glUniform1i(glGetUniformLocation(skydomeShader[1]->program, "skySample2D"), skytexture);
     
-//    glBindTexture(GL_TEXTURE_1D, htex);
     glUniform1i(glGetUniformLocation(skydomeShader[1]->program, "htrueSample1D"), htex);
     
     glBindVertexArray(varrayIDs[VARRAY]);

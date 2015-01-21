@@ -24,7 +24,7 @@ private:
     
     float solarElevation;
     float turbidity;
-    float albedo;   // open ocean albedo is near 0.03
+    float albedo;    
     
     float HosekRadiances[3];
     float HosekConfig[3][9];

@@ -8,11 +8,7 @@
 
 #include "AppContext.h"
 #include "Scene.h"
-
-
-//// using core modern OpenGL
-//#include <GL/glew.h>
-//#include <GLFW/glfw3.h>
+ 
 
 #include <math.h>
 
@@ -51,16 +47,10 @@ Scene::Scene(GLFWwindow *win)
 
 void Scene::viewport(GLFWwindow *win)
 {
-    // get window dimensions
     glfwGetFramebufferSize(win, &width, &height);
-    
-    // this viewport makes a 1 to 1 mapping of physical pixels to GL
-    // "logical" pixels
     glViewport(0, 0, width, height);
     
-    // adjust 3D projection into this window
     float ch = camera.z;
-    
     uMatrix.proj = mat4f::perspectiveProjection(camera.fovy,
                                                       float(width)/float(height),
                                                       0.1 * ch,
@@ -84,10 +74,9 @@ void Scene::view()
 //    2	-1	0	0	0
 //    3	0	1	0	3.5
 //    4	0	0	0	1
-   
+    
     uMatrix.view = mat4f::rotatey(camera.phi) * uMatrix.view;
-//	uMatrix.view = mat4f::rotatex(-camera.theta) * uMatrix.view;   //rotatex(angle in degree)
-    uMatrix.view = mat4f::rotatex(camera.theta) * uMatrix.view;
+    uMatrix.view = mat4f::rotatex(camera.theta) * uMatrix.view;   //rotatex(angle in degree)
     
     float ch = camera.z;
     uMatrix.proj = mat4f::perspectiveProjection(camera.fovy,
@@ -98,10 +87,6 @@ void Scene::view()
 
 void Scene::sunmove()
 {
-    //update sun position
-//    float sunRadius = 695800.0;
-//    float sunDistance = 149600000.0;   //(km)
-//    uMatrix.sunpos = vec4f(sin(sunTheta) * cos(sunPhi)*sunDistance , sin(sunTheta) * sin(sunPhi)*sunDistance , cos(sunTheta)*sunDistance , sunTheta);
     uMatrix.sunpos = vec4f(sin(sunTheta) * cos(sunPhi), sin(sunTheta) * sin(sunPhi), cos(sunTheta), sunTheta);
  
 }

@@ -20,16 +20,12 @@
 
 enum {
     // textures
-    
     TEXTURE_SPECTRUM12,
     TEXTURE_SPECTRUM34,
     TEXTURE_SLOPE_VARIANCE,
     TEXTURE_FFT_PING,
     TEXTURE_FFT_PONG,
     TEXTURE_BUTTERFLY,
-//    TEXTURE_TRANSMITTANCE,
-//    TEXTURE_GAUSSZ,
-//    TEXTURE_SKY,
     TEXTURE_COUNT,
     
     // GL vertex array object IDs
@@ -51,19 +47,15 @@ enum {
     // framebuffers
     FRAMEBUFFER_FFT0 = 0,
     FRAMEBUFFER_FFT1,
-//    FRAMEBUFFER_SKY,
     FRAMEBUFFER_VARIANCES,
-//    FRAMEBUFFER_GAUSS,
     FRAMEBUFFER_COUNT,
     
     // programs
     PROGRAM_RENDER = 0,
-//    PROGRAM_SHOW_SPECTRUM,
     PROGRAM_INIT,
     PROGRAM_VARIANCES,
     PROGRAM_FFTX,
     PROGRAM_FFTY,
-//    PROGRAM_WHITECAP_PRECOMPUTE,
     PROGRAM_COUNT
 };
 
@@ -84,8 +76,6 @@ private:
     }window;
     float cameraTheta;
     
-    //double updateTime;
-    // vertex attribute IDs
     unsigned int positionAttrib;  //mesh
     unsigned int posQuadAttrib[PROGRAM_COUNT];
     
@@ -107,9 +97,7 @@ public:
     
     void updateShader();
     void draw(GLFWwindow *win, float camTh, unsigned int skytex);
-    
-    //debug
-//    void drawToScreen(GLFWwindow *win);
+ 
 };
 
 

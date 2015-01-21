@@ -15,13 +15,13 @@ G  decrease field of view
 
 Moving the Sun:
 
-C  slow move up  
+C  slow move down  
 
-V  slow move down
+V  slow move up
 
-B  fast move up
+B  fast move down
 
-N  fast move down
+N  fast move up
 
 
 

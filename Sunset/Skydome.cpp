@@ -126,7 +126,6 @@ Skydome::Skydome() {
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, iFactor*h*6*sizeof(int), &indices.front(), GL_STATIC_DRAW);
     
     loadProgram();
-//    updateShader();
 }
 
 
@@ -191,9 +190,7 @@ void Skydome::updateShader()
     // reference data
     glBindTexture(GL_TEXTURE_1D, htex);
     glUniform1i(glGetUniformLocation(skydomeShader[1]->program, "htrueSample1D"), htex);
-
-    // turn off everything we enabled
-//    glBindTexture(GL_TEXTURE_2D, 0);  //0
+ 
     glBindVertexArray(0);
     glUseProgram(0);
 
@@ -206,13 +203,16 @@ void Skydome::draw( GLFWwindow *win, float theta) {
         solarElevation = M_PI/2.0 - theta;
         HosekSkyModel_Configuration( solarElevation );
         init = true;
+        
+        updateShader();
     }
-    else //if ( abs(theta + solarElevation - M_PI/2.0) > 1e-8) {   //recompute the configuration if the sunTheta changes
-    {    solarElevation = M_PI/2.0 - theta;
+    else //if ( abs(theta + solarElevation - M_PI/2.0) > 1e-8)    //recompute the configuration if the sunTheta changes
+    {
+        solarElevation = M_PI/2.0 - theta;
         HosekSkyModel_Configuration( solarElevation );
+        
+        updateShader();
     }
-    
-    updateShader();
     
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
     // render to skytexture
@@ -226,12 +226,6 @@ void Skydome::draw( GLFWwindow *win, float theta) {
     GLenum DrawBuffers[1] = {GL_COLOR_ATTACHMENT0};
     glDrawBuffers(1, DrawBuffers);
     
-    //check
-//    if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
-//    {
-//        printf("%d\n", glCheckFramebufferStatus(GL_FRAMEBUFFER));
-//    }
-    
     glViewport(0, 0, skyTexSize, skyTexSize);
     
     glUseProgram(skydomeShader[0]->program);
@@ -240,15 +234,6 @@ void Skydome::draw( GLFWwindow *win, float theta) {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferIDs[QUAD_INDEX_BUFFER]);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
     
-//    glBindTexture(GL_TEXTURE_2D, 0);
-    glUseProgram(0);
-    
-    //debug
-//    glGetError();
-//    float pixeldata[16] = {0};
-//    glReadPixels( 500, 500, 2, 2, GL_RGBA, GL_FLOAT, pixeldata);
-    
-    ///////////////////////////////////////////////////////////
     // final render
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glDrawBuffer(GL_BACK);
@@ -272,12 +257,11 @@ void Skydome::draw( GLFWwindow *win, float theta) {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferIDs[INDEX_BUFFER]);
     glDrawElements(GL_TRIANGLES, 97200, GL_UNSIGNED_INT, 0);
 
-//    glDisable(GL_CULL_FACE);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-//    glBindTexture(GL_TEXTURE_2D, 0);
-    glBindVertexArray(0);
-    glUseProgram(0);
+////    glDisable(GL_CULL_FACE);
+//    glBindBuffer(GL_ARRAY_BUFFER, 0);
+//    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+//    glBindVertexArray(0);
+//    glUseProgram(0);
 
 }
 

@@ -182,7 +182,8 @@ vec3 transmittanceWithShadow(float r, float mu) {
 }
 
 vec3 sunRadiance(float r, float muS) {
-    return transmittanceWithShadow(r, muS) * SUN_INTENSITY;
+    // return transmittanceWithShadow(r, muS) * SUN_INTENSITY;
+    return transmittanceWithShadow(r, muS) * SUN_INTENSITY * cos(sun.w);
 }
 
 void main()

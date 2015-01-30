@@ -29,9 +29,9 @@ Scene::Scene(GLFWwindow *win)
     camera.velz		= 0.0f;
     camera.x		= 0.0f;
     camera.y		= 0.0f;
-    camera.theta 	= -2.0f;   //-1.0f;
-    camera.phi 		= 2.f;
-    camera.fovy 	= 5.0f;//atan(14/len_mm)  // 22mm lens ~ 32.0f  200mm ~~ 4.0f
+    camera.theta 	= 0.0f;   //-1.0f;
+    camera.phi 		= 0.f;
+    camera.fovy 	= 45.0f;//atan(14/len_mm)  // 22mm lens ~ 32.0f  200mm ~~ 4.0f
     camera.velf     = 0.0f;
     camera.vel		= 2.0f;
     

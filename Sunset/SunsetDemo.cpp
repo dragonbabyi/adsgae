@@ -151,9 +151,10 @@ int main(int argc, char *argv[])
     myfile.open ("timeTable.txt");
     myfile << "Frame    SKY    OCEAN \n";
     
-    double lastTime = glfwGetTime();
-    int nbFrames = 0;
-    double skyTime = 0.0, oceanTime = 0.0;
+    GLuint query[10];
+    glGenQueries(10, query);
+    int i=0; // frame number
+    GLuint64 time[10];
 
     //all program should be initialized
     while (!glfwWindowShouldClose(win)) {
@@ -169,27 +170,23 @@ int main(int argc, char *argv[])
         
         glBindFramebuffer(GL_FRAMEBUFFER, 0);
         
-        // Measure speed
-        double currentTime = glfwGetTime();
-        nbFrames++;
-        if ( currentTime - lastTime >= 1.0 ){ // If last was more than 1 sec ago
-            // save and reset timer
-            myfile << 1000.0/double(nbFrames) <<"  "<< 1000.0*skyTime/double(nbFrames) <<"  "<< 1000.0*oceanTime/double(nbFrames) <<"  "<< " ms/frame \n";
-            
-            skyTime = 0.0;
-            oceanTime = 0.0;
-            
-            nbFrames = 0;
-            lastTime += 1.0;
-        }
-        
+        glBeginQuery(GL_TIME_ELAPSED,query[i%10]);
         appctx.sky->draw(win, appctx.scene->sunTheta);
-        double currentTime1 = glfwGetTime();
-        skyTime += currentTime1 - currentTime;
+        glEndQuery(GL_TIME_ELAPSED);
         
+        glBeginQuery(GL_TIME_ELAPSED,query[i%10+1]);
         appctx.ocean->draw(win, appctx.scene->camera.theta, appctx.sky->skytexture);
-        double currentTime2 = glfwGetTime();
-        oceanTime += currentTime2 - currentTime1;
+        glEndQuery(GL_TIME_ELAPSED);
+        
+        if(i>=8)
+        {
+            int t = (i+2)%10;
+            // get the time for 4 frames before
+            glGetQueryObjectui64v(query[t], GL_QUERY_RESULT, &time[t]);
+            glGetQueryObjectui64v(query[t+1], GL_QUERY_RESULT, &time[t+1]);
+            myfile << 1000000000.0/(time[t] + time[t+1]) <<"fps   "<< time[t]/1000000.0 <<"  "<< time[t+1]/1000000.0 <<" \n";
+        }
+        i = i+2;
         
         // show what we drew
         glfwSwapBuffers(win);

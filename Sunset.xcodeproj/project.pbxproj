@@ -43,6 +43,7 @@
 		B948C1FC18B52A36006564E0 /* Program.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Program.cpp; sourceTree = "<group>"; };
 		B948C1FD18B52A36006564E0 /* Program.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Program.h; sourceTree = "<group>"; };
 		B948C1FE18B52A36006564E0 /* vec4.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = vec4.h; sourceTree = "<group>"; };
+		B96B62E01A74600B0092B659 /* Shader */ = {isa = PBXFileReference; lastKnownFileType = folder; path = Shader; sourceTree = "<group>"; };
 		B9B9A78818E0EFAE00BDA2EB /* Skydome.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Skydome.cpp; sourceTree = "<group>"; };
 		B9B9A78918E0EFAE00BDA2EB /* Skydome.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Skydome.h; sourceTree = "<group>"; };
 		B9C6C62619159A3300673674 /* AppContext.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppContext.h; sourceTree = "<group>"; };
@@ -98,6 +99,7 @@
 		B948C1EC18B529CB006564E0 /* Sunset */ = {
 			isa = PBXGroup;
 			children = (
+				B96B62E01A74600B0092B659 /* Shader */,
 				B9C6C62619159A3300673674 /* AppContext.h */,
 				B947D43A19042536009ACD08 /* SunsetDemo.cpp */,
 				B948C1FB18B52A36006564E0 /* mat4.h */,

@@ -19,18 +19,10 @@
 unsigned int skyTexSize = 1024;
 ////////////////////////
 float gridSize = 4.0f;
+//float gridSize = 16.0f ;
 float hdrExposure = 1.05;
 bool grid = false;
 bool animate = true;
-bool seaContrib = true;
-bool sunContrib = true;
-bool skyContrib = true;
-bool foamContrib = false;
-bool manualFilter = false;
-bool show_spectrum = false;
-float show_spectrum_zoom = 1.0;
-bool show_spectrum_linear = false;
-bool normals = false;
 bool choppy = true; //true
 float choppy_factor0 = 2.3f;	// Control Choppiness
 float choppy_factor1 = 2.1f;	// Control Choppiness
@@ -46,10 +38,10 @@ float GRID4_SIZE = 11.0; // size in meters (i.e. in spatial domain) of the fourt
 float WIND = 12.0; //12.0 wind speed in meters per second (at 10m above surface)
 float OMEGA = 2.0f; // sea state (inverse wave age)
 bool propagate = true; // wave propagation?
-float A = 0.2; // wave amplitude factor
+float A = 2.0; // wave amplitude factor
 const float cm = 0.23; // Eq 59
 const float km = 370.0; // Eq 59
-float speed = 5.0; //0.6f;
+float speed = 1.0; //0.6f;
 
 // FFT WAVES
 const int PASSES = 8; // number of passes needed for the FFT 6 -> 64, 7 -> 128, 8 -> 256, etc
@@ -83,9 +75,9 @@ Ocean::Ocean(GLFWwindow *win)
     glfwGetFramebufferSize(win, &window.width, &window.height);
     cameraTheta = 0.0;
     
-    glBindRenderbuffer(GL_RENDERBUFFER, renderbuffers[RENDERBUFFER_DEPTH]);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, window.width, window.height);
-	glBindRenderbuffer(GL_RENDERBUFFER, 0);
+//    glBindRenderbuffer(GL_RENDERBUFFER, renderbuffers[RENDERBUFFER_DEPTH]);
+//    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, window.width, window.height);
+//	glBindRenderbuffer(GL_RENDERBUFFER, 0);
     
     float maxAnisotropy = 1.0f;
     
@@ -152,14 +144,18 @@ Ocean::Ocean(GLFWwindow *win)
     glDrawBuffer(GL_BACK);
     
 	// Grid
-	generateMesh(cameraTheta);
+	generateMesh();
     
     // Programs
     loadPrograms();
     
 	// Slope
 	computeSlopeVarianceTex();  //textures[TEXTURE_SLOPE_VARIANCE]
-
+    //
+    glUseProgram(programs[PROGRAM_RENDER]->program);
+    glActiveTexture( GL_TEXTURE0 + TEXTURE_SLOPE_VARIANCE);
+    glBindTexture(GL_TEXTURE_2D, TEXTURE_SLOPE_VARIANCE);
+    glUniform1i(glGetUniformLocation(programs[PROGRAM_RENDER]->program, "slopeVarianceSampler"), TEXTURE_SLOPE_VARIANCE);
 }
 
 Ocean::~Ocean()
@@ -191,12 +187,11 @@ void Ocean::draw( GLFWwindow *win, float camTh, unsigned int skytex)
        window.height != height ||
        cameraTheta != camTh)
     {
-        generateMesh(camTh);
-//        printf("re-generate the mesh\n");
-//        printf("%f \n", camTh);
         window.width = width;
         window.height = height;
         cameraTheta = camTh;
+        
+        generateMesh();
     }
     
     static double now = glfwGetTime();
@@ -225,7 +220,7 @@ void Ocean::draw( GLFWwindow *win, float camTh, unsigned int skytex)
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
 
-    //update shader
+    //update shader uniforms
 	glUseProgram(programs[PROGRAM_RENDER]->program);
     glActiveTexture(GL_TEXTURE0 + skytex);
     glGenerateMipmap(GL_TEXTURE_2D);
@@ -233,10 +228,10 @@ void Ocean::draw( GLFWwindow *win, float camTh, unsigned int skytex)
     glBindTexture(GL_TEXTURE_2D, skytex);
     glUniform1i(glGetUniformLocation(programs[PROGRAM_RENDER]->program, "skySampler"), skytex);
     
-    glActiveTexture(GL_TEXTURE0 + TEXTURE_SLOPE_VARIANCE);   /////
-    glBindTexture(GL_TEXTURE_2D, TEXTURE_SLOPE_VARIANCE);
-    glUniform1i(glGetUniformLocation(programs[PROGRAM_RENDER]->program, "slopeVarianceSampler"), TEXTURE_SLOPE_VARIANCE);
-    
+//    glActiveTexture( GL_TEXTURE0 + TEXTURE_SLOPE_VARIANCE);   /////
+//    glBindTexture(GL_TEXTURE_2D, TEXTURE_SLOPE_VARIANCE);
+//    glUniform1i(glGetUniformLocation(programs[PROGRAM_RENDER]->program, "slopeVarianceSampler"), TEXTURE_SLOPE_VARIANCE);
+//    
 	glBindTexture(GL_TEXTURE_2D_ARRAY, textures[TEXTURE_FFT_PING]);
 	glUniform1i(glGetUniformLocation(programs[PROGRAM_RENDER]->program, "fftWavesSampler"), TEXTURE_FFT_PING);
     
@@ -250,21 +245,10 @@ void Ocean::draw( GLFWwindow *win, float camTh, unsigned int skytex)
     glEnableVertexAttribArray(positionAttrib);
     glBindBuffer(GL_ARRAY_BUFFER, buffers[BUFFER_GRID_VERTEX]);
     glVertexAttribPointer(positionAttrib, 4, GL_FLOAT, GL_FALSE, 0, 0);
-
-    if (grid)
-	{
-		glPolygonMode(GL_FRONT, GL_LINE);
-		glPolygonMode(GL_BACK, GL_LINE);
-	}
-	else
-	{
-		glPolygonMode(GL_FRONT, GL_FILL);
-		glPolygonMode(GL_BACK, GL_FILL);
-	}
     
     //draw mesh
     /////////////////////////////////////////////////////////////////////////////////////////
-    glUseProgram(programs[PROGRAM_RENDER]->program);
+//    glUseProgram(programs[PROGRAM_RENDER]->program);
     glBindVertexArray(varrays[VARRAY_MESH]);
     
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffers[BUFFER_GRID_INDEX]);
@@ -394,20 +378,14 @@ void Ocean::drawQuad(int programindex)
 
 void Ocean::loadPrograms()
 {
-	char* files[2];
-	char options[512];
-    //	files[0] = "Shader/atmosphere.glsl";
-    //	files[1] = "Shader/ocean.glsl";
+	char* files[1];
     files[0] = "Shader/ocean.glsl";
-    sprintf(options, "#define %sSEA_CONTRIB\n#define %sSUN_CONTRIB\n#define %sSKY_CONTRIB\n#define %sHARDWARE_ANISTROPIC_FILTERING\n#define %sFOAM_CONTRIB\n",
-	        seaContrib ? "" : "NO_", sunContrib ? "" : "NO_", skyContrib ? "" : "NO_", manualFilter ? "NO_" : "", foamContrib ? "" : "NO_");
-	
 	if (programs[PROGRAM_RENDER] != NULL)
 	{
 		delete programs[PROGRAM_RENDER];
 		programs[PROGRAM_RENDER] = NULL;
 	}
-    programs[PROGRAM_RENDER] = new Program(1, files, options);
+    programs[PROGRAM_RENDER] = new Program(1, files);
 	glUseProgram(programs[PROGRAM_RENDER]->program);
     
     glUniform1f(glGetUniformLocation(programs[PROGRAM_RENDER]->program, "hdrExposure"), hdrExposure);
@@ -415,8 +393,6 @@ void Ocean::loadPrograms()
     glUniform3f(glGetUniformLocation(programs[PROGRAM_RENDER]->program, "seaColor"), 10.0/255.0, 40.0/255.0, 120.0/255.0);
 	glUniform4f(glGetUniformLocation(programs[PROGRAM_RENDER]->program, "GRID_SIZES"), GRID1_SIZE, GRID2_SIZE, GRID3_SIZE, GRID4_SIZE);
 	glUniform2f(glGetUniformLocation(programs[PROGRAM_RENDER]->program, "gridSize"), gridSize/float(window.width), gridSize/float(window.height));
-	glUniform1f(glGetUniformLocation(programs[PROGRAM_RENDER]->program, "spectrum"), show_spectrum);
-	glUniform1f(glGetUniformLocation(programs[PROGRAM_RENDER]->program, "normals"), normals);
 	glUniform1f(glGetUniformLocation(programs[PROGRAM_RENDER]->program, "choppy"), choppy);
 	glUniform4f(glGetUniformLocation(programs[PROGRAM_RENDER]->program, "choppy_factor"),choppy_factor0,choppy_factor1,choppy_factor2,choppy_factor3);
     
@@ -483,7 +459,7 @@ void Ocean::loadPrograms()
 
 float frandom(long *seed);
 
-void Ocean::generateMesh(float cameraTheta)
+void Ocean::generateMesh()
 {
     if (vboSize != 0)
     {
@@ -495,8 +471,7 @@ void Ocean::generateMesh(float cameraTheta)
     
 //    float horizon = tan(cameraTheta / 180.0 * M_PI);
 //    float s = fmin(1.1f, 0.5f + horizon * 0.5f);
-////    float s = fmin(1.1f, 1.0f - horizon * 0.5f);
- 
+    
     float s = 1.1;
     float vmargin = 0.1;
     float hmargin = 0.1;

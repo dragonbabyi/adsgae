@@ -88,7 +88,7 @@ public:
     
     Ocean(GLFWwindow *win);
     ~Ocean();
-    void generateMesh(float cameraTheta);
+    void generateMesh();
     void loadPrograms();
     void generateWavesSpectrum();
     void simulateFFTWaves(float t);

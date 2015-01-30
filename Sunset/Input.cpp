@@ -61,6 +61,7 @@ void Input::mouseMove(GLFWwindow *win, Scene *scene, double x, double y)
             scene->camera.theta = 89.f;
         
     }
+    //    printf("%f \n", scene->camera.theta);
     
     // update prior mouse state
     oldButton = button;

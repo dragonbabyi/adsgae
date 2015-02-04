@@ -61,7 +61,7 @@ void Input::mouseMove(GLFWwindow *win, Scene *scene, double x, double y)
             scene->camera.theta = 89.f;
         
     }
-    //    printf("%f \n", scene->camera.theta);
+//    printf("%f \n", scene->camera.theta);
     
     // update prior mouse state
     oldButton = button;
@@ -99,7 +99,7 @@ void Input::keyPress(GLFWwindow *win, int key, Scene *scene, Skydome *skydome, O
             scene->camera.fovy = 5.0;
             break;
         case 'H':
-            scene->camera.fovy = 45.0;
+            scene->camera.fovy = 90.0;
             break;
         case 'O':
             scene->camera.phi = 2.0;   // in angle

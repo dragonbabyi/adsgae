@@ -178,12 +178,13 @@ vec3 analyticTransmittance(float r, float mu, float d) {
 }
 
 vec3 transmittanceWithShadow(float r, float mu) {
-    return mu < -sqrt(1.0 - (Rg / r) * (Rg / r)) ? vec3(0.0) : analyticTransmittance(r, mu, Rg);
+//    return mu < -sqrt(1.0 - (Rg / r) * (Rg / r)) ? vec3(0.0) : analyticTransmittance(r, mu, Rg);
+    return analyticTransmittance(r, mu, Rg);
 }
 
 vec3 sunRadiance(float r, float muS) {
-    // return transmittanceWithShadow(r, muS) * SUN_INTENSITY;
-    return transmittanceWithShadow(r, muS) * SUN_INTENSITY * cos(sun.w);
+     return transmittanceWithShadow(r, muS) * SUN_INTENSITY*100;
+//    return transmittanceWithShadow(r, muS) * SUN_INTENSITY * cos(sun.w)*100;
 }
 
 void main()
@@ -202,7 +203,7 @@ void main()
     // vec3 skyc = mix(pow(0.38317*rgb,vec3(1.0/2.2)), 1.-exp(-rgb), step(1.413,rgb));
     vec3 avg = textureLod (skySample2D, vec2(0.5, 0.5), 10.0).xyz;
     float hdrExposure = 5.0 - 2.75 * cos(sun.w);
-    // float hdrExposure = 5.0;
+//    float hdrExposure = 5.0;
     vec3 Lrgb = XYZ2RGB(avg);
     float avglum = 0.2126 * Lrgb.x + 0.7152 * Lrgb.y + 0.0722 * Lrgb.z;
     avglum *= hdrExposure;
@@ -277,7 +278,6 @@ void main()
     {
         // compute the sun radiance --> color
         vec3 worldV = vec3(0.0, 0.0, 1.0); // vertical vector
-        // vec3 worldSunDir = normalize(vec3(sin(Sun_theta)*distance, 0.0, cos(Sun_theta)*distance - viewpoint.z));
         vec3 worldSunDir = normalize(vec3(sin(Sun_theta)*distance, 0.0, cos(Sun_theta)*distance));
       
         float r = 6360005;  //(m)  // length(worldCamera + earthPos) (m)
@@ -285,12 +285,7 @@ void main()
         vec3 sunColor = sunRadiance(r, muS);   // radiance
         sunColor = toneMap5(sunColor, avglum);
 
-        // keep the sun color when the radiance goes to 0
-        if (sunColor.x < 0.2 || sunColor.y < 0.01 || sunColor.z < 0.01 )
-        {
-            sunColor = vec3(1.0, 0.0, 0.0);
-        }
-        // // limb darkening 
+        // limb darkening
         float u = 0.6;  
         float d = acos(dot(viewdir, worldSunDir)) / halfangle;   // distance from the center of the sun 
         // avoid middle black

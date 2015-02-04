@@ -75,7 +75,7 @@ Skydome::Skydome() {
     
     //default
     solarElevation = M_PI/2.0;
-    turbidity = 2.0;
+    turbidity = 1.5;
     albedo = 0.03;
     init = false;
     

@@ -21,8 +21,8 @@ unsigned int skyTexSize = 1024;
 float gridSize = 4.0f;
 //float gridSize = 16.0f ;
 float hdrExposure = 1.05;
-bool grid = false;
-bool animate = true;
+//bool grid = false;
+//bool animate = true;
 bool choppy = true; //true
 float choppy_factor0 = 2.3f;	// Control Choppiness
 float choppy_factor1 = 2.1f;	// Control Choppiness
@@ -75,9 +75,9 @@ Ocean::Ocean(GLFWwindow *win)
     glfwGetFramebufferSize(win, &window.width, &window.height);
     cameraTheta = 0.0;
     
-//    glBindRenderbuffer(GL_RENDERBUFFER, renderbuffers[RENDERBUFFER_DEPTH]);
-//    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, window.width, window.height);
-//	glBindRenderbuffer(GL_RENDERBUFFER, 0);
+    glBindRenderbuffer(GL_RENDERBUFFER, renderbuffers[RENDERBUFFER_DEPTH]);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, window.width, window.height);
+	glBindRenderbuffer(GL_RENDERBUFFER, 0);
     
     float maxAnisotropy = 1.0f;
     
@@ -145,17 +145,33 @@ Ocean::Ocean(GLFWwindow *win)
     
 	// Grid
 	generateMesh();
+    // Quad
+    generateQuad();
     
     // Programs
     loadPrograms();
     
 	// Slope
 	computeSlopeVarianceTex();  //textures[TEXTURE_SLOPE_VARIANCE]
-    //
+   
+    ////////////////////////////////////////////
     glUseProgram(programs[PROGRAM_RENDER]->program);
     glActiveTexture( GL_TEXTURE0 + TEXTURE_SLOPE_VARIANCE);
     glBindTexture(GL_TEXTURE_2D, TEXTURE_SLOPE_VARIANCE);
     glUniform1i(glGetUniformLocation(programs[PROGRAM_RENDER]->program, "slopeVarianceSampler"), TEXTURE_SLOPE_VARIANCE);
+
+    drawBuffers = new GLenum[8]
+	{
+		GL_COLOR_ATTACHMENT0,
+		GL_COLOR_ATTACHMENT1,
+		GL_COLOR_ATTACHMENT2,
+		GL_COLOR_ATTACHMENT3,
+		GL_COLOR_ATTACHMENT4,
+		GL_COLOR_ATTACHMENT5,
+		GL_COLOR_ATTACHMENT6,
+		GL_COLOR_ATTACHMENT7
+	};
+    
 }
 
 Ocean::~Ocean()
@@ -184,14 +200,17 @@ void Ocean::draw( GLFWwindow *win, float camTh, unsigned int skytex)
     int width, height;
     glfwGetFramebufferSize(win, &width, &height);
     if(window.width != width ||
-       window.height != height ||
-       cameraTheta != camTh)
+       window.height != height )
+//       || cameraTheta != camTh)
     {
         window.width = width;
         window.height = height;
-        cameraTheta = camTh;
-        
+//        cameraTheta = camTh;
+        printf("re-generate mesh...\n");
         generateMesh();
+    }
+    if (cameraTheta != camTh) {
+        cameraTheta = camTh;
     }
     
     static double now = glfwGetTime();
@@ -201,8 +220,8 @@ void Ocean::draw( GLFWwindow *win, float camTh, unsigned int skytex)
     float delta = update - now;
     
     static double t = 0.0;
-    if(animate)
-		t += delta*speed;
+//    if(animate)
+    t += delta*speed;
     
     ///////////////////////////////////////////////////////
     // solve fft
@@ -228,10 +247,6 @@ void Ocean::draw( GLFWwindow *win, float camTh, unsigned int skytex)
     glBindTexture(GL_TEXTURE_2D, skytex);
     glUniform1i(glGetUniformLocation(programs[PROGRAM_RENDER]->program, "skySampler"), skytex);
     
-//    glActiveTexture( GL_TEXTURE0 + TEXTURE_SLOPE_VARIANCE);   /////
-//    glBindTexture(GL_TEXTURE_2D, TEXTURE_SLOPE_VARIANCE);
-//    glUniform1i(glGetUniformLocation(programs[PROGRAM_RENDER]->program, "slopeVarianceSampler"), TEXTURE_SLOPE_VARIANCE);
-//    
 	glBindTexture(GL_TEXTURE_2D_ARRAY, textures[TEXTURE_FFT_PING]);
 	glUniform1i(glGetUniformLocation(programs[PROGRAM_RENDER]->program, "fftWavesSampler"), TEXTURE_FFT_PING);
     
@@ -246,9 +261,8 @@ void Ocean::draw( GLFWwindow *win, float camTh, unsigned int skytex)
     glBindBuffer(GL_ARRAY_BUFFER, buffers[BUFFER_GRID_VERTEX]);
     glVertexAttribPointer(positionAttrib, 4, GL_FLOAT, GL_FALSE, 0, 0);
     
-    //draw mesh
-    /////////////////////////////////////////////////////////////////////////////////////////
-//    glUseProgram(programs[PROGRAM_RENDER]->program);
+    //////////////////   draw   //////////////////////////
+    //    glUseProgram(programs[PROGRAM_RENDER]->program);
     glBindVertexArray(varrays[VARRAY_MESH]);
     
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffers[BUFFER_GRID_INDEX]);
@@ -334,14 +348,14 @@ float spectrum(float kx, float ky, bool omnispectrum = false)
     }
     
 	// remove waves perpendicular to wind dir
-	float tweak = sqrt(fmax(kx/sqrt(kx*kx+ky*ky),0.0f));
+	float tweak = sqrt(fmax(kx/k,0.0f));
 	tweak = 1.0f;
     return A * (Bl + Bh) * (1.0 + Delta * cos(2.0 * phi)) / (2.0 * M_PI * sqr(sqr(k))) * tweak; // Eq 67
 }
 
-void Ocean::drawQuad(int programindex)
+void Ocean::generateQuad()
 {
-    vec4f *vertexdata = new vec4f[4];
+    vertexdata = new vec4f[4];
     vertexdata[0] = vec4f(-1.0, -1.0, 0.0, 0.0);
     vertexdata[1] = vec4f(+1.0, -1.0, 1.0, 0.0);
     vertexdata[2] = vec4f(-1.0, +1.0, 0.0, 1.0);
@@ -349,11 +363,17 @@ void Ocean::drawQuad(int programindex)
     glBindBuffer(GL_ARRAY_BUFFER, buffers[BUFFER_QUAD_VERTEX]);
     glBufferData(GL_ARRAY_BUFFER, 4 * sizeof(vec4f), vertexdata, GL_STATIC_DRAW);
     
-    GLuint indices[6] = {0, 1, 2, 2, 1, 3};
+    indices = new GLuint[6]{0, 1, 2, 2, 1, 3};
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffers[BUFFER_QUAD_INDEX]);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, 6 * sizeof(GLuint), indices, GL_STATIC_DRAW);
     
-    ////////////////////////////////////////////////////////////////////////////////
+    delete[] vertexdata;
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+}
+
+void Ocean::drawQuad(int programindex)
+{
     glBindVertexArray(varrays[VARRAY_QUAD]);
     posQuadAttrib[programindex] = glGetAttribLocation(programs[programindex]->program, "position");
     
@@ -368,8 +388,6 @@ void Ocean::drawQuad(int programindex)
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffers[BUFFER_QUAD_INDEX]);
     glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
     
-    delete[] vertexdata;
-
 }
 
 // ----------------------------------------------------------------------------
@@ -404,8 +422,8 @@ void Ocean::loadPrograms()
 	}
 	programs[PROGRAM_INIT] = new Program(1, files);
 	glUseProgram(programs[PROGRAM_INIT]->program);
-	glUniform1i(glGetUniformLocation(programs[PROGRAM_INIT]->program, "spectrum_1_2_Sampler"), TEXTURE_SPECTRUM12);
-	glUniform1i(glGetUniformLocation(programs[PROGRAM_INIT]->program, "spectrum_3_4_Sampler"), TEXTURE_SPECTRUM34);
+//	glUniform1i(glGetUniformLocation(programs[PROGRAM_INIT]->program, "spectrum_1_2_Sampler"), TEXTURE_SPECTRUM12);
+//	glUniform1i(glGetUniformLocation(programs[PROGRAM_INIT]->program, "spectrum_3_4_Sampler"), TEXTURE_SPECTRUM34);
     glUniform1f(glGetUniformLocation(programs[PROGRAM_INIT]->program, "FFT_SIZE"),FFT_SIZE);
 	glUniform4f(glGetUniformLocation(programs[PROGRAM_INIT]->program, "INVERSE_GRID_SIZES"),
 		        2.0 * M_PI * FFT_SIZE / GRID1_SIZE,
@@ -422,8 +440,8 @@ void Ocean::loadPrograms()
 	programs[PROGRAM_VARIANCES] = new Program(1, files);
 	glUseProgram(programs[PROGRAM_VARIANCES]->program);
 	glUniform1f(glGetUniformLocation(programs[PROGRAM_VARIANCES]->program, "N_SLOPE_VARIANCE"), N_SLOPE_VARIANCE);
-	glUniform1i(glGetUniformLocation(programs[PROGRAM_VARIANCES]->program, "spectrum_1_2_Sampler"), TEXTURE_SPECTRUM12);
-	glUniform1i(glGetUniformLocation(programs[PROGRAM_VARIANCES]->program, "spectrum_3_4_Sampler"), TEXTURE_SPECTRUM34);
+//	glUniform1i(glGetUniformLocation(programs[PROGRAM_VARIANCES]->program, "spectrum_1_2_Sampler"), TEXTURE_SPECTRUM12);
+//	glUniform1i(glGetUniformLocation(programs[PROGRAM_VARIANCES]->program, "spectrum_3_4_Sampler"), TEXTURE_SPECTRUM34);
 	glUniform1i(glGetUniformLocation(programs[PROGRAM_VARIANCES]->program, "FFT_SIZE"), FFT_SIZE);
     
     files[0] = "Shader/fftx.glsl";
@@ -642,7 +660,7 @@ void Ocean::computeSlopeVarianceTex()
         theoreticSlopeVariance += k * k * spectrum(k, 0, true) * (nextK - k);
         k = nextK;
     }
-    
+//    printf("theoreticSlopeVariance: %f", theoreticSlopeVariance);
     // slope variance due to waves, by integrating over the spectrum part
     // that is covered by the four nested grids. This can give a smaller result
     // than the theoretic total slope variance, because the higher frequencies
@@ -664,6 +682,8 @@ void Ocean::computeSlopeVarianceTex()
             totalSlopeVariance += getSlopeVariance(i / GRID4_SIZE, j / GRID4_SIZE, spectrum34 + offset + 2);
         }
     }
+    
+//    printf("totalSlopeVariance: %f", totalSlopeVariance);
     
     glBindFramebuffer(GL_FRAMEBUFFER, framebuffers[FRAMEBUFFER_VARIANCES]);
 //    glDrawBuffer(GL_COLOR_ATTACHMENT0);
@@ -789,18 +809,6 @@ void Ocean::simulateFFTWaves(float t)
                                      0,
                                      i);
 	}
-    
-	GLenum drawBuffers[8] =
-	{
-		GL_COLOR_ATTACHMENT0,
-		GL_COLOR_ATTACHMENT1,
-		GL_COLOR_ATTACHMENT2,
-		GL_COLOR_ATTACHMENT3,
-		GL_COLOR_ATTACHMENT4,
-		GL_COLOR_ATTACHMENT5,
-		GL_COLOR_ATTACHMENT6,
-		GL_COLOR_ATTACHMENT7
-	};
     
 	glDrawBuffers(choppy ? 8 : 3, drawBuffers);
 

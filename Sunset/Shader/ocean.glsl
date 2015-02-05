@@ -212,14 +212,12 @@ vec3 analyticTransmittance(float r, float mu, float d) {
 }
 
 vec3 transmittanceWithShadow(float r, float mu) {
-    // return mu < -sqrt(1.0 - (Rg / r) * (Rg / r)) ? vec3(0.0) : transmittance(r, mu);
     return mu < -sqrt(1.0 - (Rg / r) * (Rg / r)) ? vec3(0.0) : analyticTransmittance(r, mu, Rg);
 }
 
 vec3 sunRadiance(float r, float muS) {
     // return transmittanceWithShadow(r, muS) * SUN_INTENSITY;
     return transmittanceWithShadow(r, muS) * SUN_INTENSITY * cos(sunpos.w);
-    // return transmittanceWithShadow(r, muS) * 2.0;
 }
 
 void sunRadianceAndSkyIrradiance(vec3 worldP, vec3 worldS, out vec3 sunL)
@@ -237,8 +235,6 @@ vec3 hdr(vec3 L) {
     L.b = L.b < 1.413 ? pow(L.b * 0.38317, 1.0 / 2.2) : 1.0 - exp(-L.b);
     return L;
 }
-
-////////////////////
 
 // ---------------------------------------------------------------------------
 // REFLECTED SUN RADIANCE
@@ -328,21 +324,6 @@ vec3 XYZ2RGB(vec3 xyz) {
   return rgb;
 }
 
-// manual anisotropic filter
-vec4 myTexture2DGrad(sampler2D tex, vec2 u, vec2 s, vec2 t)
-{
-    const float TEX_SIZE = 512.0; // 'tex' size in pixels
-    const int N = 1; // use (2*N+1)^2 samples
-    vec4 r = vec4(0.0);
-    float l = max(0.0, log2(max(length(s), length(t)) * TEX_SIZE) - 0.0);
-    for (int i = -N; i <= N; ++i) {
-        for (int j = -N; j <= N; ++j) {
-            r += textureLod(tex, u + (s * float(i) + t * float(j)) / float(N), l);
-        }
-    }
-    return r / pow(2.0 * float(N) + 1.0, 2.0);
-}
-
 // V, N, Tx, Ty in world space;
 vec3 meanSkyRadiance(vec3 V, vec3 N, vec3 Tx, vec3 Ty, vec2 sigmaSq) {
     vec4 result = vec4(0.0);
@@ -352,9 +333,9 @@ vec3 meanSkyRadiance(vec3 V, vec3 N, vec3 Tx, vec3 Ty, vec2 sigmaSq) {
     vec2 dux = 2.0 * (U(vec2(eps, 0.0), V, N, Tx, Ty) - u0) / eps * sqrt(sigmaSq.x);
     vec2 duy = 2.0 * (U(vec2(0.0, eps), V, N, Tx, Ty) - u0) / eps * sqrt(sigmaSq.y);
 
-//    result = textureGrad(skySampler, u0 * (0.5 / 1.1) + 0.5, dux * (0.5 / 1.1), duy * (0.5 / 1.1));
-//    result = myTexture2DGrad(skySampler, u0 * (0.5 / 1.1) + 0.5, dux * (0.5 / 1.1), duy * (0.5 / 1.1));
-    result = texture(skySampler, u0 * (0.5 / 1.1) + 0.5);
+    result = textureGrad(skySampler, u0 * (0.5 / 1.1) + 0.5, dux * (0.5 / 1.1), duy * (0.5 / 1.1));
+
+//    result = texture(skySampler, u0 * (0.5 / 1.1) + 0.5);
 
     result.rgb = result.rgb / result.w;
 
@@ -435,7 +416,7 @@ void main() {
 // // #endif
 
 // #ifdef SKY_CONTRIB
-	vec3 Lsky = meanSkyRadiance(V, N, Tx, Ty, sigmaSq) / 10.0;
+	vec3 Lsky = meanSkyRadiance(V, N, Tx, Ty, sigmaSq) ;
 	Rs += fresnel * Lsky;
 	FragColor.rgb = Rs;
 // #endif
@@ -448,7 +429,7 @@ void main() {
 	vec3 Esky = Lsun * sunSr + Lsky * omega;
 	vec3 Lsea = seaColor * Esky / M_PI;
 	Ru += (1.0 - fresnel) * Lsea;
-//	FragColor.rgb += Ru;
+	FragColor.rgb += Ru;
 // #endif
 
 	FragColor.rgb = hdr(FragColor.rgb); 

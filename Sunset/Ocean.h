@@ -76,6 +76,11 @@ private:
     }window;
     float cameraTheta;
     
+    vec4f *vertexdata;
+    GLuint *indices;
+
+    GLenum *drawBuffers;
+    
     unsigned int positionAttrib;  //mesh
     unsigned int posQuadAttrib[PROGRAM_COUNT];
     
@@ -89,6 +94,8 @@ public:
     Ocean(GLFWwindow *win);
     ~Ocean();
     void generateMesh();
+    void generateQuad();
+    
     void loadPrograms();
     void generateWavesSpectrum();
     void simulateFFTWaves(float t);

@@ -110,8 +110,8 @@ void Input::keyPress(GLFWwindow *win, int key, Scene *scene, Skydome *skydome, O
      
         //reload the shaders
         case 'R':   //int = 82
-            skydome->updateShader();
-            //ocean->updateShader();
+//            skydome->updateShader();
+            ocean->updateShader();
             break;
         // Escape: exit
         case GLFW_KEY_ESCAPE:

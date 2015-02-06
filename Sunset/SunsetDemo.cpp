@@ -175,7 +175,7 @@ int main(int argc, char *argv[])
         glEndQuery(GL_TIME_ELAPSED);
         
         glBeginQuery(GL_TIME_ELAPSED,query[i%10+1]);
-        appctx.ocean->draw(win, appctx.scene->camera.theta, appctx.sky->skytexture);
+        appctx.ocean->draw(win, appctx.scene->camera.theta);
         glEndQuery(GL_TIME_ELAPSED);
         
         if(i>=8)

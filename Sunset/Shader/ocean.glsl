@@ -46,7 +46,7 @@ uniform sampler2DArray fftWavesSampler;	// ocean surface
 uniform vec4 GRID_SIZES;
 uniform float hdrExposure;
 uniform vec3 seaColor; // sea bottom color
-//uniform float normals;
+
 uniform float choppy;
 uniform vec4 choppy_factor;
 uniform float jacobian_scale;
@@ -101,7 +101,6 @@ void main() {
     }
     P = vec3(u + dP.xy, dP.z);   // varying
 
-    // float d = (projMatrix * modelView * vec4(P, 1.0)).x;   // will be negative in the opposite direction
     // float angle = -R(d);  //R = 0.4773;  //0.4776959488
     float angle = -0.4773;
     // rotate -R along axis y
@@ -114,8 +113,6 @@ void main() {
     pos.w = 1.0;           
 	// Final position
     gl_Position = projMatrix * modelView * pos;
-    // gl_Position = projMatrix * modelView * vec4(P, 1.0);
-	//gl_Position = projMatrix * modelView * vec4(u, dP.z, 1.0);
 
 }
 
@@ -216,8 +213,8 @@ vec3 transmittanceWithShadow(float r, float mu) {
 }
 
 vec3 sunRadiance(float r, float muS) {
-     return transmittanceWithShadow(r, muS) * SUN_INTENSITY;
-//    return transmittanceWithShadow(r, muS) * SUN_INTENSITY * cos(sunpos.w);
+//     return transmittanceWithShadow(r, muS) * SUN_INTENSITY;
+    return transmittanceWithShadow(r, muS) * SUN_INTENSITY * (cos(sunpos.w));
 }
 
 void sunRadianceAndSkyIrradiance(vec3 worldP, vec3 worldS, out vec3 sunL)
@@ -255,7 +252,6 @@ float erf(float x) {
 float Lambda(float cosTheta, float sigmaSq) {
 	float v = cosTheta / sqrt((1.0 - cosTheta * cosTheta) * (2.0 * sigmaSq));
     return max(0.0, (exp(-v * v) - v * sqrt(M_PI) * erfc(v)) / (2.0 * v * sqrt(M_PI)));
-	//return (exp(-v * v)) / (2.0 * v * sqrt(M_PI)); // approximate, faster formula
 }
 
 // L, V, N, Tx, Ty in world space
@@ -324,21 +320,6 @@ vec3 XYZ2RGB(vec3 xyz) {
   return rgb;
 }
 
-// manual anisotropic filter
-vec4 myTexture2DGrad(sampler2D tex, vec2 u, vec2 s, vec2 t)
-{
-    const float TEX_SIZE = 1024.0; // 'tex' size in pixels
-    const int N = 1; // use (2*N+1)^2 samples
-    vec4 r = vec4(0.0);
-    float l = max(0.0, log2(max(length(s), length(t)) * TEX_SIZE) - 0.0);
-    for (int i = -N; i <= N; ++i) {
-        for (int j = -N; j <= N; ++j) {
-            r += textureLod(tex, u + (s * float(i) + t * float(j)) / float(N), l);
-        }
-    }
-    return r / pow(2.0 * float(N) + 1.0, 2.0);
-}
-
 // V, N, Tx, Ty in world space;
 vec3 meanSkyRadiance(vec3 V, vec3 N, vec3 Tx, vec3 Ty, vec2 sigmaSq) {
     vec4 result = vec4(0.0);
@@ -348,16 +329,10 @@ vec3 meanSkyRadiance(vec3 V, vec3 N, vec3 Tx, vec3 Ty, vec2 sigmaSq) {
     vec2 dux = 2.0 * (U(vec2(eps, 0.0), V, N, Tx, Ty) - u0) / eps * sqrt(sigmaSq.x);
     vec2 duy = 2.0 * (U(vec2(0.0, eps), V, N, Tx, Ty) - u0) / eps * sqrt(sigmaSq.y);
 
-//    result = textureGrad(skySampler, u0 * (0.5 / 1.1) + 0.5, dux * (0.5 / 1.1), duy * (0.5 / 1.1));
-//    result = textureGrad(skySampler, u0 * (0.5 / 1.1) + 0.5, dux, duy);
-
-//    result = myTexture2DGrad(skySampler, u0 * (0.5 / 1.1) + 0.5, dux * (0.5 / 1.1), duy * (0.5 / 1.1));
-    result = texture(skySampler, u0 * (0.5 / 1.1) + 0.5);
-
+    result = textureGrad(skySampler, u0 * (0.5 / 1.1) + 0.5, dux * (0.5 / 1.1), duy * (0.5 / 1.1));
     result.rgb = abs(result.rgb / result.w);
 
     return result.rgb;
-   
 }
 
 
@@ -395,7 +370,7 @@ void main() {
 	if (dot(V, N) < 0.0) {
 		N = reflect(N, V); // reflects backfacing normals
 	}
-
+///////
 	float Jxx = dFdx(u.x);
 	float Jxy = dFdy(u.x);
 	float Jyx = dFdx(u.y);
@@ -409,7 +384,9 @@ void main() {
 	float uc = pow(C / SCALE, 0.25);
 	vec2 sigmaSq = texture(slopeVarianceSampler, vec3(ua, ub, uc)).xw;
 
+    sigmaSq /= 30.0;
 	sigmaSq = max(sigmaSq, 2e-5);
+//    vec2 sigmaSq = vec2(0.003, 0.003);
 
 	vec3 Ty = normalize(vec3(0.0, N.z, -N.y));
 	vec3 Tx = cross(Ty, N);
@@ -428,12 +405,12 @@ void main() {
 	FragColor = vec4(0.0);
 
 // // #ifdef SUN_CONTRIB
-	Rs += reflectedSunRadiance(worldSunDir, V, N, Tx, Ty, sigmaSq) * Lsun / 10.0;
+	Rs += reflectedSunRadiance(worldSunDir, V, N, Tx, Ty, sigmaSq) * Lsun;
 	FragColor.rgb = Rs;
 // // #endif
 
 // #ifdef SKY_CONTRIB
-	vec3 Lsky = meanSkyRadiance(V, N, Tx, Ty, sigmaSq) / 100.0;
+	vec3 Lsky = meanSkyRadiance(V, N, Tx, Ty, sigmaSq) / 50.0;
 	Rs += fresnel * Lsky;
 	FragColor.rgb = Rs;
 // #endif

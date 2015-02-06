@@ -103,7 +103,7 @@ public:
     void drawQuad(int programindex);
     
     void updateShader();
-    void draw(GLFWwindow *win, float camTh, unsigned int skytex);
+    void draw(GLFWwindow *win, float camTh);
  
 };
 

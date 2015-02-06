@@ -37,7 +37,7 @@ Skydome::Skydome() {
     //add sky texture
     skyTexSize = 1024;
     glGenTextures(1, &skytexture);
-    glActiveTexture(GL_TEXTURE0 + skytexture);
+    glActiveTexture(GL_TEXTURE0 + 6);
 	glBindTexture(GL_TEXTURE_2D, skytexture);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, skyTexSize, skyTexSize, 0, GL_RGBA, GL_FLOAT, 0);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
@@ -45,7 +45,7 @@ Skydome::Skydome() {
     glGenerateMipmapEXT(GL_TEXTURE_2D);
     
     glGenTextures(1, &htex);
-    glActiveTexture(GL_TEXTURE0 + htex);
+    glActiveTexture(GL_TEXTURE0 + 7);
 	glBindTexture(GL_TEXTURE_1D, htex);
     glTexImage1D(GL_TEXTURE_1D, 0, GL_R32F, 1024, 0, GL_RED, GL_FLOAT, htrue);
     glTexParameteri(GL_TEXTURE_1D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -54,7 +54,7 @@ Skydome::Skydome() {
     //depth
     glGenRenderbuffers(1, &depthrenderbuffer);
     glBindRenderbuffer(GL_RENDERBUFFER, depthrenderbuffer);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, 1024, 768);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, 1024, 1024);
     glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, depthrenderbuffer);
     
     glGenBuffers(NUM_BUFFERS, bufferIDs);
@@ -75,7 +75,7 @@ Skydome::Skydome() {
     
     //default
     solarElevation = M_PI/2.0;
-    turbidity = 1.5;
+    turbidity = 2.0;
     albedo = 0.03;
     init = false;
     
@@ -182,14 +182,9 @@ void Skydome::updateShader()
     glUniformBlockBinding(skydomeShader[1]->program,
                           glGetUniformBlockIndex(skydomeShader[1]->program,"Matrices"),
                           AppContext::MATRIX_UNIFORMS);
-    
-    //skytexture
-    glBindTexture(GL_TEXTURE_2D, skytexture);
-    glUniform1i(glGetUniformLocation(skydomeShader[1]->program, "skySample2D"), skytexture);
-    
-    // reference data
-    glBindTexture(GL_TEXTURE_1D, htex);
-    glUniform1i(glGetUniformLocation(skydomeShader[1]->program, "htrueSample1D"), htex);
+   
+    glUniform1i(glGetUniformLocation(skydomeShader[1]->program, "skySample2D"), 6);
+    glUniform1i(glGetUniformLocation(skydomeShader[1]->program, "htrueSample1D"), 7);
  
     glBindVertexArray(0);
     glUseProgram(0);
@@ -218,8 +213,6 @@ void Skydome::draw( GLFWwindow *win, float theta) {
     // render to skytexture
     glEnable(GL_DEPTH_TEST);
     
-    glBindTexture(GL_TEXTURE_2D, skytexture);
-    
     glBindFramebuffer(GL_FRAMEBUFFER, skyframebuffer);
     glFramebufferTexture(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, skytexture, 0);
     
@@ -246,22 +239,12 @@ void Skydome::draw( GLFWwindow *win, float theta) {
     glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); //GL_LINE
   
     //skytexture
-    glActiveTexture(GL_TEXTURE0 + skytexture);
+    glActiveTexture(GL_TEXTURE0 + 6);
     glGenerateMipmap(GL_TEXTURE_2D);
-    
-    glUniform1i(glGetUniformLocation(skydomeShader[1]->program, "skySample2D"), skytexture);
-    
-    glUniform1i(glGetUniformLocation(skydomeShader[1]->program, "htrueSample1D"), htex);
-    
+   
     glBindVertexArray(varrayIDs[VARRAY]);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufferIDs[INDEX_BUFFER]);
     glDrawElements(GL_TRIANGLES, 97200, GL_UNSIGNED_INT, 0);
-
-////    glDisable(GL_CULL_FACE);
-//    glBindBuffer(GL_ARRAY_BUFFER, 0);
-//    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-//    glBindVertexArray(0);
-//    glUseProgram(0);
 
 }
 

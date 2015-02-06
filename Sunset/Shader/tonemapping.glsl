@@ -134,7 +134,7 @@ vec3 hdr(vec3 L) {
 
 const float SUN_INTENSITY = 100.0;
 const float SCALE = 1000.0;
-const float Rg = 6360.0 * SCALE; // (m)  //6,371
+const float Rg = 6360.0 * SCALE; // (m)  //6,371   //6360.0
  // Rayleigh
 const float HR = 8.0 * SCALE;
 const vec3 betaR = vec3(5.8e-3, 1.35e-2, 3.31e-2) / SCALE;
@@ -178,13 +178,12 @@ vec3 analyticTransmittance(float r, float mu, float d) {
 }
 
 vec3 transmittanceWithShadow(float r, float mu) {
-//    return mu < -sqrt(1.0 - (Rg / r) * (Rg / r)) ? vec3(0.0) : analyticTransmittance(r, mu, Rg);
     return analyticTransmittance(r, mu, Rg);
 }
 
 vec3 sunRadiance(float r, float muS) {
-     return transmittanceWithShadow(r, muS) * SUN_INTENSITY*100;
-//    return transmittanceWithShadow(r, muS) * SUN_INTENSITY * cos(sun.w)*100;
+     return transmittanceWithShadow(r, muS) * SUN_INTENSITY * 100.0;
+//    return transmittanceWithShadow(r, muS) * SUN_INTENSITY * cos(sun.w);
 }
 
 void main()
@@ -200,10 +199,8 @@ void main()
     //************* tone mapping *************
  
     vec3 rgb = XYZ2RGB(XYZ);
-    // vec3 skyc = mix(pow(0.38317*rgb,vec3(1.0/2.2)), 1.-exp(-rgb), step(1.413,rgb));
     vec3 avg = textureLod (skySample2D, vec2(0.5, 0.5), 10.0).xyz;
     float hdrExposure = 5.0 - 2.75 * cos(sun.w);
-//    float hdrExposure = 5.0;
     vec3 Lrgb = XYZ2RGB(avg);
     float avglum = 0.2126 * Lrgb.x + 0.7152 * Lrgb.y + 0.0722 * Lrgb.z;
     avglum *= hdrExposure;
@@ -226,9 +223,6 @@ void main()
     float prefix = (P/101.0) * 283.0/(273.0 + T); 
     
     float R, h, Htexcoord;
-    // R = prefix/tan((ha + 7.31/(ha + 4.4)) * MATH_PI / 180.0);   //in arcminutes
-    // h = ha - R/60.0;   // true altitude in degree
-
     ///////////////////
     if (ha * 60 > 256.0)
     {
@@ -262,10 +256,9 @@ void main()
     // sun_phi = 0.0
     vec3 realSun = vec3(sin(Sun_theta)*distance, 0.0, cos(Sun_theta)*distance);
 
-    // vec3 realSun = vec3(sun.x, sun.y, sun.z) * distance;
     vec3 dc = viewpoint - realSun;
     // if the sun is in the opposite direction  ( < PI/2 )
-    if(dot(viewdir, normalize(dc)) > -0.8) { // > 0.0 ) {
+    if(dot(viewdir, normalize(dc)) > -0.8) {
         return;
     }
     // solve p=r.start-center + t*r.direction; p*p -radius^2=0  

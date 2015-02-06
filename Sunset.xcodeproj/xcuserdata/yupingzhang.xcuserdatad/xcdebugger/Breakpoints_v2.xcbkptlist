@@ -9,14 +9,12 @@
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
-            filePath = "Sunset/Skydome.cpp"
-            timestampString = "444341302.516284"
+            filePath = "Sunset/Ocean.cpp"
+            timestampString = "444888897.72677"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "162"
-            endingLineNumber = "162"
-            landmarkName = "Skydome::updateShader()"
-            landmarkType = "5">
+            startingLineNumber = "557"
+            endingLineNumber = "557">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -26,12 +24,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Sunset/Ocean.cpp"
-            timestampString = "444713004.406681"
+            timestampString = "444732737.580753"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "551"
-            endingLineNumber = "551"
-            landmarkName = "Ocean::generateMesh()"
+            startingLineNumber = "248"
+            endingLineNumber = "248"
+            landmarkName = "Ocean::draw( GLFWwindow *win, float camTh)"
             landmarkType = "5">
          </BreakpointContent>
       </BreakpointProxy>

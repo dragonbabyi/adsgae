@@ -16,7 +16,7 @@ Change field of view:
 
 </ul>
 
-Moving the Sun:
+Move the Sun:
 
 <ul>
 
@@ -36,7 +36,7 @@ Change view direction:
 
 <ul>
 
-<li>O  set camera phi to 2 degree (towards the Sun)</li>
+<li>O  set camera phi to 2 degree (toward the Sun)</li>
 
 <li>P  set camera phi to -182 degree (opposite to the Sun)</li>
 

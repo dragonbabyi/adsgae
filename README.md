@@ -1,34 +1,43 @@
-sunset
+Sunset 
 ======
-observe at 5m
+This simulation observes at 5m from sea level.
 
 Change field of view:
 
-D  set field of view to 5 degree
+<ul>
 
-H  set field of view to 45 degree
+<li>D  set field of view to 5 degree</li>
 
-F  increase field of view
+<li>H  set field of view to 45 degree</li>
 
-G  decrease field of view
+<li>F  increase field of view</li>
 
+<li>G  decrease field of view</li>
+
+</ul>
 
 Moving the Sun:
 
-C  slow move down  
+<ul>
 
-V  slow move up
+<li>C  slow move down</li>
 
-B  fast move down
+<li>V  slow move up</li>
 
-N  fast move up
+<li>B  fast move down</li>
 
+<li>N  fast move up</li>
 
+</ul>
 
 Change view direction:
 
-Hold the mouse left and move to change the view direction.
+<ul>Hold the mouse left button and move to change the view direction.</ul>
 
-O  set camera phi to 2 degree (towards to the Sun)
+<ul>
 
-P  set camera phi to -182 degree (opposite to the Sun)
+<li>O  set camera phi to 2 degree (towards the Sun)</li>
+
+<li>P  set camera phi to -182 degree (opposite to the Sun)</li>
+
+</ul>
